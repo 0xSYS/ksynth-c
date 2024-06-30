@@ -11,11 +11,13 @@ endif
 ifdef WIN32
 CC := i686-w64-mingw32-gcc
 WINDOWS := YES
+LIBS += -lrt
 endif
 
 ifdef WIN64
 CC := x86_64-w64-mingw32-gcc
 WINDOWS := YES
+LIBS += -lrt
 endif
 
 OBJS := ./src/ksynth.o ./src/sample.o ./src/voice.o
