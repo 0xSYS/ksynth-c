@@ -24,14 +24,32 @@ jobs:
         run: |
           sed -i 's/COMMIT_NUMBER_PLACEHOLDER/${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}/g' src/ksynth.c
       - name: Build for Linux
-        run: make
-      - name: Build for Windows (mingw i686)
-        run: make WIN32=YES
-      - name: Build for Windows (mingw x86_64)
-        run: make WIN64=YES
-      - name: Upload artifacts
+        run: |
+          make clean
+          make
+      - name: Upload artifacts (Linux)
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
-          name: KSynth Binary
+          name: KSynth Binary (Linux)
           path: |
-            out/*.*
+            out/libksynth.so
+      - name: Build for Windows (mingw i686)
+        run: |
+          make clean
+          make WIN32=YES
+      - name: Upload artifacts (mingw i686)
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        with:
+          name: KSynth Binary (mingw i686)
+          path: |
+            out/ksynth_x86.dll
+      - name: Build for Windows (mingw x86_64)
+        run: |
+          make clean
+          make WIN64=YES
+      - name: Upload artifacts (mingw x86_64)
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        with:
+          name: KSynth Binary (mingw x86_64)
+          path: |
+            out/ksynth_x64.dll
