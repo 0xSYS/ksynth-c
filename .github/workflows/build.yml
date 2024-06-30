@@ -22,8 +22,12 @@ jobs:
       - name: Replace placeholder in source file
         run: |
           sed -i 's/COMMIT_NUMBER_PLACEHOLDER/${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}/g' src/ksynth.c
-      - name: make
+      - name: Build for Linux
         run: make
+      - name: Build for Windows (mingw i686)
+        run: make WIN32=YES
+      - name: Build for Windows (mingw x86_64)
+        run: make WIN64=YES
       - name: Upload artifacts
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
