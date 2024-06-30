@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    ":disablePrControls",
+    ":labels(dependencies)",
+    ":pathSemanticCommitType(.github/workflows/**, ci)",
+    ":prHourlyLimitNone",
+    ":rebaseStalePrs",
+    ":semanticCommits",
+    "customManagers:githubActionsVersions"
+  ],
+  "assigneesFromCodeOwners": true,
+  "dependencyDashboardAutoclose": true,
+  "prConcurrentLimit": 3,
+	"packageRules": [
+    {
+      "matchDepTypes": ["dependencies", "require"],
+      "semanticCommitType": "deps",
+      "semanticCommitScope": null
+    }
+	]
+}
