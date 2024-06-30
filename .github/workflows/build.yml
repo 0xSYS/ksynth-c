@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.7
+        with:
+          fetch-depth: 0
+
+      - name: Get commit number
+        id: get_commit_number
+        run: echo "COMMIT_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Replace placeholder in source file
+        run: |
+          sed -i 's/COMMIT_NUMBER_PLACEHOLDER/${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}/g' src/ksynth.c
+      - name: make
+        run: make
+      - name: Upload artifacts
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        with:
+          name: KSynth Binary
+          path: |
+            out/*.*
