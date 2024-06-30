@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up MinGW (i686, x86_64)
-        run: sudo apt-get install gcc-mingw-w64-i686 mingw-w64 gcc-mingw-w64-x86-64
+        run: sudo apt-get install gcc-mingw-w64-i686 gcc-mingw-w64-x86-64
       - name: Get commit number
         id: get_commit_number
         run: echo "COMMIT_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
