@@ -14,14 +14,8 @@ jobs:
         uses: actions/checkout@v4.1.7
         with:
           fetch-depth: 0
-      - name: Set up MinGW (i686)
-        uses: egor-tensin/setup-mingw@v2.2.0
-        with:
-          platform: x86
-      - name: Set up MinGW (x86_64)
-        uses: egor-tensin/setup-mingw@v2.2.0
-        with:
-          platform: x64
+      - name: Set up MinGW (i686, x86_64)
+        run: sudo apt-get install gcc-mingw-w64-i686 gcc-mingw-w64-x86-64
       - name: Get commit number
         id: get_commit_number
         run: echo "COMMIT_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
