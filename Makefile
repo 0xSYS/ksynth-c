@@ -64,3 +64,6 @@ format:
 
 clean:
 	rm -rf out $(OBJS)
+
+clean_objs:
+	rm -rf $(OBJS)
