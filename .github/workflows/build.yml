@@ -29,17 +29,17 @@ jobs:
         run: |
           make clean_objs
           make
-          strip libksynth.dll
+          strip out/libksynth.dll
       - name: Build for Windows (mingw i686)
         run: |
           make clean_objs
           make WIN32=YES
-          strip ksynth_x86.dll
+          strip out/ksynth_x86.dll
       - name: Build for Windows (mingw x86_64)
         run: |
           make clean_objs
           make WIN64=YES
-          strip ksynth_x64.dll
+          strip out/ksynth_x64.dll
       - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
