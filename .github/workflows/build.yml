@@ -29,7 +29,7 @@ jobs:
         run: |
           make clean_objs
           make
-          strip out/libksynth.dll
+          strip out/libksynth.so
       - name: Build for Windows (mingw i686)
         run: |
           make clean_objs
