@@ -443,12 +443,12 @@ void ksynth_fill_buffer(struct KSynth* ksynth_instance, float* buffer, unsigned 
 
 	clock_gettime(CLOCK_MONOTONIC, &rendering_time_end);
 
-	float buffer_generate_elapsed_time_ns = (rendering_time_end.tv_sec - rendering_time_start.tv_sec) * 1.0e9 + (rendering_time_end.tv_nsec - rendering_time_start.tv_nsec);
+	float buffer_generate_elapsed_time_ns = (rendering_time_end.tv_sec - rendering_time_start.tv_sec) * 1e9 + (rendering_time_end.tv_nsec - rendering_time_start.tv_nsec);
 	float buffer_generate_elapsed_time_ms = buffer_generate_elapsed_time_ns / 1e6;
 
 	float rendering_time = (float)buffer_generate_elapsed_time_ms / buffer_size;
 
-	ksynth_instance->rendering_time = rendering_time * 100.f;
+	ksynth_instance->rendering_time = rendering_time * 100;
 }
 
 float* ksynth_generate_buffer(struct KSynth* ksynth_instance, unsigned int buffer_size) {
