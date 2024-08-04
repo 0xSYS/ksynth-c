@@ -38,6 +38,7 @@ struct KSynth {
 	float rendering_time;
 	struct Chan channels[16];
 	struct Voice** voices;
+	bool release_oldest_instance;
 };
 
 /**
@@ -72,6 +73,7 @@ int ksynth_get_commit_number(void);
  * @param sample_rate Sample rate
  * @param num_channel Number of channels (1-2)
  * @param max_polyphony Maximum polyphony (1-100,000)
+ * @param release_oldest_instance If true, only the oldest instance of the note will be released on note_off; otherwise, all instances of the note on the given channel will be released.
  * @return A pointer to the newly created KSynth instance on success, NULL on failure.
  *
  * @~japanese
@@ -88,9 +90,10 @@ int ksynth_get_commit_number(void);
  * @param sample_rate サンプルレート
  * @param num_channel チャンネル数（1〜2）
  * @param max_polyphony 最大ポリフォニー（1〜100,000）
+ * @param release_oldest_instance ノートオフの際に最も古いインスタンスのみをリリースする場合は true、すべてのインスタンスをリリースする場合は false。
  * @return 成功した場合は新しいKSynthインスタンスへのポインタ、失敗した場合はNULL
  */
-struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate, unsigned char num_channel, unsigned int max_polyphony);
+struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate, unsigned char num_channel, unsigned int max_polyphony, bool release_oldest_instance);
 
 /**
  * @~english
@@ -210,6 +213,21 @@ unsigned int ksynth_get_max_polyphony(struct KSynth* ksynth_instance);
  * @return 成功した場合はtrue、失敗した場合はfalse
  */
 bool ksynth_set_max_polyphony(struct KSynth* ksynth_instance, unsigned int max_polyphony);
+
+/**
+ * @~english
+ * @brief Sets whether to release only the oldest note instance on note off.
+ *
+ * @param ksynth_instance Pointer to the KSynth instance
+ * @param release_oldest_instance If true, only the oldest instance of the note is released on note off. If false, all instances of the note on the specified channel are released.
+ *
+ * @~japanese
+ * @brief ノートオフ時に最も古いノートインスタンスのみをリリースするかどうかを設定します。
+ *
+ * @param ksynth_instance KSynthインスタンスへのポインタ
+ * @param release_oldest_instance trueの場合、ノートオフ時に指定されたチャンネルのノートの最も古いインスタンスのみがリリースされます。falseの場合、指定されたチャンネルのノートのすべてのインスタンスがリリースされます。
+ */
+void ksynth_set_release_oldest_instance(struct KSynth* ksynth_instance, bool release_oldest);
 
 /**
  * @~english
