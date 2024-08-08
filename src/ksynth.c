@@ -1,7 +1,7 @@
 #include "ksynth.h"
 
 #define MAX_KEYS 128
-#define MAX_POLYPHONY 1000000
+#define MAX_POLYPHONY 100000
 #define MIN_BUF 8
 #define MAX_BUF 65536
 
