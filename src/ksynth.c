@@ -474,11 +474,11 @@ float* ksynth_generate_buffer(struct KSynth* ksynth_instance, unsigned int buffe
 	}
 
 	if (buffer_size < MIN_BUF) {
-			buffer_size = MIN_BUF;
 			fprintf(stderr, "[KSynth] Warning: buffer_size is less than MIN_BUF! Clamping to %d...\n", MIN_BUF);
+			buffer_size = MIN_BUF;
 	} else if (buffer_size >= MAX_BUF) {
-			buffer_size = MAX_BUF;
 			fprintf(stderr, "[KSynth] Warning: buffer_size is greater than or equal to MAX_BUF! Clamping to %d...\n", MAX_BUF);
+			buffer_size = MAX_BUF;
 	}
 
 	float* buffer = malloc(buffer_size * sizeof(float));
