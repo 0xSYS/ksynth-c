@@ -72,6 +72,7 @@ else
       ./out/libksynth.so: $(OBJS)
 	  mkdir -p ./out
 	  $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+      endif
     endif
   endif
 endif
