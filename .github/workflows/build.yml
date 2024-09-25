@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        arch: [x86_64, i686, arm64, armv7]
+        arch: [x86_64, i686, arm64]
 
     steps:
       - name: Checkout code
@@ -29,11 +29,9 @@ jobs:
 
       - name: Set up ARM64 cross-compiler
         if: matrix.arch == 'arm64'
-        run: sudo apt-get install gcc-aarch64-linux-gnu build-essential
-
-      - name: Set up ARMv7 cross-compiler
-        if: matrix.arch == 'armv7'
-        run: sudo apt-get install gcc-arm-linux-gnueabi
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu build-essential
 
       - name: Get commit number
         id: get_commit_number
@@ -44,7 +42,7 @@ jobs:
           sed -i 's/COMMIT_NUMBER_PLACEHOLDER/${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}/g' src/ksynth.c
 
       - name: Build for Linux
-        if: matrix.arch != 'i686' && matrix.arch != 'arm64' && matrix.arch != 'armv7'
+        if: matrix.arch != 'i686' && matrix.arch != 'arm64'
         run: |
           make clean_objs
           make
@@ -55,20 +53,16 @@ jobs:
         run: |
           echo "Building for ARM64..."
           make clean_objs
-          make ARM64=YES
+          # Use the ARM64 specific flags if needed
+          make CC=aarch64-linux-gnu-gcc ARM64=YES
           echo "Listing output directory:"
           ls -l out
-          aarch64-linux-gnu-strip out/libksynth_arm64.so || echo "ARM64 build did not produce out/libksynth_arm64.so"
-
-      - name: Build for ARMv7
-        if: matrix.arch == 'armv7'
-        run: |
-          echo "Building for ARMv7..."
-          make clean_objs
-          make ARMV7=YES
-          echo "Listing output directory:"
-          ls -l out
-          arm-linux-gnueabi-strip out/libksynth_armv7.so || echo "ARMv7 build did not produce out/libksynth_armv7.so"
+          if [ -f out/libksynth_arm64.so ]; then
+            aarch64-linux-gnu-strip out/libksynth_arm64.so
+          else
+            echo "ARM64 build did not produce out/libksynth_arm64.so"
+            exit 1
+          fi
 
       - name: Build for Windows (mingw i686)
         if: matrix.arch == 'i686'
@@ -89,7 +83,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release create c${{ steps.get_commit_number.outputs.COMMIT_NUMBER }} out/*
+          gh release create c${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}
 
       - name: Upload artifacts
         env:
