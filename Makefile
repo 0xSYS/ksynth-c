@@ -4,40 +4,40 @@ LDFLAGS :=
 LIBS := -lm
 
 ifeq ($(DEBUG),YES)
-    CFLAGS += -g
+	CFLAGS += -g
 endif
 
 ifeq ($(EMSCRIPTEN),YES)
-    CC := emcc
-    CFLAGS := -D_POSIX_C_SOURCE=199309L -std=c99 -ffast-math
-    LDFLAGS := -s ALLOW_MEMORY_GROWTH=1
-    EMSCRIPTEN_FLAGS := -s EXPORTED_FUNCTIONS='["stringToUTF8", "lengthBytesUTF8", "_malloc", "_free", "_ksynth_get_commit_number", "_ksynth_new", "_ksynth_note_on", "_ksynth_note_off", "_ksynth_note_off_all", "_ksynth_cc", "_ksynth_get_polyphony", "_ksynth_get_max_polyphony", "_ksynth_set_max_polyphony", "_ksynth_set_release_oldest_instance", "_ksynth_fill_buffer", "_ksynth_generate_buffer", "_ksynth_get_rendering_time", "_ksynth_get_polyphony_for_channel", "_ksynth_buffer_free", "_ksynth_free"]'
+	CC := emcc
+	CFLAGS := -D_POSIX_C_SOURCE=199309L -std=c99 -ffast-math
+	LDFLAGS := -s ALLOW_MEMORY_GROWTH=1
+	EMSCRIPTEN_FLAGS := -s EXPORTED_FUNCTIONS='["stringToUTF8", "lengthBytesUTF8", "_malloc", "_free", "_ksynth_get_commit_number", "_ksynth_new", "_ksynth_note_on", "_ksynth_note_off", "_ksynth_note_off_all", "_ksynth_cc", "_ksynth_get_polyphony", "_ksynth_get_max_polyphony", "_ksynth_set_max_polyphony", "_ksynth_set_release_oldest_instance", "_ksynth_fill_buffer", "_ksynth_generate_buffer", "_ksynth_get_rendering_time", "_ksynth_get_polyphony_for_channel", "_ksynth_buffer_free", "_ksynth_free"]'
 endif
 
 .PHONY: all clean format
 
 ifdef WIN32
-    CC := i686-w64-mingw32-gcc
-    WINDOWS := YES
-    LIBS += -lpthread
+	CC := i686-w64-mingw32-gcc
+	WINDOWS := YES
+	LIBS += -lpthread
 endif
 
 ifdef WIN64
-    CC := x86_64-w64-mingw32-gcc
-    WINDOWS := YES
-    LIBS += -lpthread
+	CC := x86_64-w64-mingw32-gcc
+	WINDOWS := YES
+	LIBS += -lpthread
 endif
 
 ifdef ARM64
-    CC := aarch64-linux-gnu-gcc
-    CFLAGS += -march=armv8-a
-    TARGET := ./out/ksynth_arm64.so
+	CC := aarch64-linux-gnu-gcc
+	CFLAGS += -march=armv8-a
+	TARGET := ./out/ksynth_arm64.so
 endif
 
 ifdef ARMV7
-    CC := arm-linux-gnueabi-gcc
-    CFLAGS += -march=armv7-a
-    TARGET := ./out/ksynth_armv7.so
+	CC := arm-linux-gnueabi-gcc
+	CFLAGS += -march=armv7-a
+	TARGET := ./out/ksynth_armv7.so
 endif
 
 OBJS := ./src/ksynth.o ./src/sample.o ./src/voice.o
@@ -64,19 +64,19 @@ ifeq ($(EMSCRIPTEN),YES)
 	mkdir -p ./out
 	emcc $(CFLAGS) $(LDFLAGS) $(EMSCRIPTEN_FLAGS) -o $@ $^ $(LIBS) -s WASM=1
 else
-    ifdef ARM64
-        $(TARGET): $(OBJS)
-        mkdir -p ./out
-        $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-    endif
-    ifdef ARMV7
-        $(TARGET): $(OBJS)
-        mkdir -p ./out
-        $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-    endif
-    ./out/libksynth.so: $(OBJS)
-        mkdir -p ./out
-        $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+	ifdef ARM64
+	$(TARGET): $(OBJS)
+		mkdir -p ./out
+		$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+	endif
+	ifdef ARMV7
+	$(TARGET): $(OBJS)
+		mkdir -p ./out
+		$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+	endif
+	./out/libksynth.so: $(OBJS)
+		mkdir -p ./out
+		$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
 endif
 endif
 endif
