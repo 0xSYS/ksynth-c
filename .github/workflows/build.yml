@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        arch: [x86_64, i686, arm64]
+        arch: [x86_64, i686, arm64, armv7]
 
     steps:
       - name: Checkout code
@@ -31,6 +31,10 @@ jobs:
         if: matrix.arch == 'arm64'
         run: sudo apt-get install gcc-aarch64-linux-gnu build-essential
 
+      - name: Set up ARMv7 cross-compiler
+        if: matrix.arch == 'armv7'
+        run: sudo apt-get install gcc-arm-linux-gnueabi
+
       - name: Get commit number
         id: get_commit_number
         run: echo "COMMIT_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
@@ -40,7 +44,7 @@ jobs:
           sed -i 's/COMMIT_NUMBER_PLACEHOLDER/${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}/g' src/ksynth.c
 
       - name: Build for Linux
-        if: matrix.arch != 'i686' && matrix.arch != 'arm64'
+        if: matrix.arch != 'i686' && matrix.arch != 'arm64' && matrix.arch != 'armv7'
         run: |
           make clean_objs
           make
@@ -55,6 +59,16 @@ jobs:
           echo "Listing output directory:"
           ls -l out
           aarch64-linux-gnu-strip out/libksynth_arm64.so || echo "ARM64 build did not produce out/libksynth_arm64.so"
+
+      - name: Build for ARMv7
+        if: matrix.arch == 'armv7'
+        run: |
+          echo "Building for ARMv7..."
+          make clean_objs
+          make ARMV7=YES
+          echo "Listing output directory:"
+          ls -l out
+          arm-linux-gnueabi-strip out/libksynth_armv7.so || echo "ARMv7 build did not produce out/libksynth_armv7.so"
 
       - name: Build for Windows (mingw i686)
         if: matrix.arch == 'i686'
@@ -75,7 +89,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release create c${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}
+          gh release create c${{ steps.get_commit_number.outputs.COMMIT_NUMBER }} out/*
 
       - name: Upload artifacts
         env:
