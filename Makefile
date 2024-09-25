@@ -1,100 +1,87 @@
 CC := gcc
 CFLAGS := -D_POSIX_C_SOURCE=199309L -std=c99 -ffast-math
-LDFLAGS :=
+LDFLAGS := 
 LIBS := -lm
 
 ifeq ($(DEBUG),YES)
-	CFLAGS += -g
+    CFLAGS += -g
 endif
 
 ifeq ($(EMSCRIPTEN),YES)
-	CC := emcc
-	CFLAGS := -D_POSIX_C_SOURCE=199309L -std=c99 -ffast-math
-	LDFLAGS := -s ALLOW_MEMORY_GROWTH=1
-	EMSCRIPTEN_FLAGS := -s EXPORTED_FUNCTIONS='["stringToUTF8", "lengthBytesUTF8", "_malloc", "_free", "_ksynth_get_commit_number", "_ksynth_new", "_ksynth_note_on", "_ksynth_note_off", "_ksynth_note_off_all", "_ksynth_cc", "_ksynth_get_polyphony", "_ksynth_get_max_polyphony", "_ksynth_set_max_polyphony", "_ksynth_set_release_oldest_instance", "_ksynth_fill_buffer", "_ksynth_generate_buffer", "_ksynth_get_rendering_time", "_ksynth_get_polyphony_for_channel", "_ksynth_buffer_free", "_ksynth_free"]'
+    CC := emcc
+    CFLAGS := -D_POSIX_C_SOURCE=199309L -std=c99 -ffast-math
+    LDFLAGS := -s ALLOW_MEMORY_GROWTH=1
+    EMSCRIPTEN_FLAGS := -s EXPORTED_FUNCTIONS='["stringToUTF8", "lengthBytesUTF8", "_malloc", "_free", "_ksynth_get_commit_number", "_ksynth_new", "_ksynth_note_on", "_ksynth_note_off", "_ksynth_note_off_all", "_ksynth_cc", "_ksynth_get_polyphony", "_ksynth_get_max_polyphony", "_ksynth_set_max_polyphony", "_ksynth_set_release_oldest_instance", "_ksynth_fill_buffer", "_ksynth_generate_buffer", "_ksynth_get_rendering_time", "_ksynth_get_polyphony_for_channel", "_ksynth_buffer_free", "_ksynth_free"]'
 endif
 
 .PHONY: all clean format
 
 ifdef WIN32
-	CC := i686-w64-mingw32-gcc
-	LIBS += -lpthread
+    CC := i686-w64-mingw32-gcc
+    WINDOWS := YES
+    LIBS += -lpthread
 endif
 
 ifdef WIN64
-	CC := x86_64-w64-mingw32-gcc
-	LIBS += -lpthread
+    CC := x86_64-w64-mingw32-gcc
+    WINDOWS := YES
+    LIBS += -lpthread
 endif
 
 ifdef ARM64
-	CC := aarch64-linux-gnu-gcc
-	LIBS += -lpthread
+    CC := aarch64-linux-gnu-gcc
+    CFLAGS += -march=armv8-a
+    TARGET := ./out/ksynth_arm64.so
 endif
 
 ifdef ARMV7
-	CC := arm-linux-gnueabi-gcc
-	LIBS += -lpthread
+    CC := arm-linux-gnueabi-gcc
+    CFLAGS += -march=armv7-a
+    TARGET := ./out/ksynth_armv7.so
 endif
 
 OBJS := ./src/ksynth.o ./src/sample.o ./src/voice.o
 
-# Windows specific DLL targets
 ifdef WINDOWS
-  ifdef WIN32
-    out/ksynth_x86.dll: $(OBJS)
-	    mkdir -p ./out
-	    $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-  endif
-  
-  ifdef WIN64
-    out/ksynth_x64.dll: $(OBJS)
-	    mkdir -p ./out
-	    $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-  endif
+ifdef WIN32
+./out/ksynth_x86.dll: $(OBJS)
+	mkdir -p ./out
+	$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+endif
+ifdef WIN64
+./out/ksynth_x64.dll: $(OBJS)
+	mkdir -p ./out
+	$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+endif
 else
-  # Linux shared libraries or static libraries
-  ifdef STATIC
-    ./out/libksynth.a: $(OBJS)
-	    mkdir -p ./out
-	    ar rcs $@ $^
-
-    ifeq ($(ARM64),YES)
-    ./out/libksynth_arm64.a: $(OBJS)
-	    mkdir -p ./out
-	    ar rcs $@ $^
+ifdef STATIC
+./out/libksynth.a: $(OBJS)
+	mkdir -p ./out
+	ar rcs $@ $^
+else
+ifeq ($(EMSCRIPTEN),YES)
+./out/ksynth.js: $(OBJS)
+	mkdir -p ./out
+	emcc $(CFLAGS) $(LDFLAGS) $(EMSCRIPTEN_FLAGS) -o $@ $^ $(LIBS) -s WASM=1
+else
+    ifdef ARM64
+        $(TARGET): $(OBJS)
+        mkdir -p ./out
+        $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
     endif
-    
-    ifeq ($(ARMV7),YES)
-    ./out/libksynth_armv7.a: $(OBJS)
-	    mkdir -p ./out
-	    ar rcs $@ $^
+    ifdef ARMV7
+        $(TARGET): $(OBJS)
+        mkdir -p ./out
+        $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
     endif
-  else
-    ifeq ($(EMSCRIPTEN),YES)
-    ./out/ksynth.js: $(OBJS)
-	    mkdir -p ./out
-	    emcc $(CFLAGS) $(LDFLAGS) $(EMSCRIPTEN_FLAGS) -o $@ $^ $(LIBS) -s WASM=1
-    else
-      ifeq ($(ARM64),YES)
-      ./out/libksynth_arm64.so: $(OBJS)
-	    mkdir -p ./out
-	    $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-      else
-      ifeq ($(ARMV7),YES)
-      ./out/libksynth_armv7.so: $(OBJS)
-	    mkdir -p ./out
-	    $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-      else
-      ./out/libksynth.so: $(OBJS)
-	    mkdir -p ./out
-	    $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-      endif
-      endif
-    endif
-  endif
+    ./out/libksynth.so: $(OBJS)
+        mkdir -p ./out
+        $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+endif
+endif
 endif
 
-all: 
+all:
 	$(MAKE) -C . WIN32=YES
 	$(MAKE) -C . WIN64=YES
 	$(MAKE) -C . ARM64=YES
