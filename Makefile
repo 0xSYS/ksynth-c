@@ -33,6 +33,11 @@ ifdef ARM64
 	LIBS += -lpthread
 endif
 
+ifdef ARMV7
+	CC := arm-linux-gnueabi-gcc
+	LIBS += -lpthread
+endif
+
 OBJS := ./src/ksynth.o ./src/sample.o ./src/voice.o
 
 ifdef WINDOWS
@@ -58,6 +63,12 @@ else
 	  mkdir -p ./out
 	  ar rcs $@ $^
     endif
+    
+    ifeq ($(ARMV7),YES)
+    ./out/libksynth_armv7.a: $(OBJS)
+	  mkdir -p ./out
+	  ar rcs $@ $^
+    endif
   else
     ifeq ($(EMSCRIPTEN),YES)
     ./out/ksynth.js: $(OBJS)
@@ -69,9 +80,15 @@ else
 	  mkdir -p ./out
 	  $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
       else
+      ifeq ($(ARMV7),YES)
+      ./out/libksynth_armv7.so: $(OBJS)
+	  mkdir -p ./out
+	  $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+      else
       ./out/libksynth.so: $(OBJS)
 	  mkdir -p ./out
 	  $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+      endif
       endif
     endif
   endif
@@ -81,6 +98,7 @@ all:
 	$(MAKE) -C . WIN32=YES
 	$(MAKE) -C . WIN64=YES
 	$(MAKE) -C . ARM64=YES
+	$(MAKE) -C . ARMV7=YES
 	$(MAKE) -C .
 
 ./src/ksynth.o: ./src/ksynth.c ./src/ksynth.h
