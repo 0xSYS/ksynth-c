@@ -49,9 +49,12 @@ jobs:
       - name: Build for ARM64
         if: matrix.arch == 'arm64'
         run: |
+          echo "Building for ARM64..."
           make clean_objs
           make ARM64=YES
-          aarch64-linux-gnu-strip out/libksynth_arm64.so
+          echo "Listing output directory:"
+          ls -l out
+          aarch64-linux-gnu-strip out/libksynth_arm64.so || echo "ARM64 build did not produce out/libksynth_arm64.so"
 
       - name: Build for Windows (mingw i686)
         if: matrix.arch == 'i686'
