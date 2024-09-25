@@ -16,8 +16,13 @@ jobs:
         uses: actions/checkout@v4.1.7
         with:
           fetch-depth: 0
+
       - name: Set up MinGW (i686, x86_64)
         run: sudo apt-get install gcc-mingw-w64-i686 gcc-mingw-w64-x86-64
+
+      - name: Set up ARM64 cross-compiler
+        run: sudo apt-get install gcc-aarch64-linux-gnu build-essential
+
       - name: Get commit number
         id: get_commit_number
         run: echo "COMMIT_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
@@ -25,30 +30,41 @@ jobs:
       - name: Replace placeholder in source file
         run: |
           sed -i 's/COMMIT_NUMBER_PLACEHOLDER/${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}/g' src/ksynth.c
+
       - name: Build for Linux
         run: |
           make clean_objs
           make
           strip out/libksynth.so
+
+      - name: Build for Linux (ARM64)
+        run: |
+          make clean_objs
+          make CC=aarch64-linux-gnu-gcc
+          aarch64-linux-gnu-strip out/libksynth_arm64.so
+
       - name: Build for Windows (mingw i686)
         run: |
           make clean_objs
           make WIN32=YES
           strip out/ksynth_x86.dll
+
       - name: Build for Windows (mingw x86_64)
         run: |
           make clean_objs
           make WIN64=YES
           strip out/ksynth_x64.dll
+
       - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-            gh release create c${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}
+          gh release create c${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}
+
       - name: Upload artifacts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-            gh release upload c${{ steps.get_commit_number.outputs.COMMIT_NUMBER }} out/*
+          gh release upload c${{ steps.get_commit_number.outputs.COMMIT_NUMBER }} out/*
