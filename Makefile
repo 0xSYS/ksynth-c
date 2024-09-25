@@ -28,6 +28,11 @@ ifdef WIN64
     LIBS += -lpthread
 endif
 
+ifdef ARM64
+    CC := aarch64-linux-gnu-gcc
+    LIBS += -lpthread
+endif
+
 OBJS := ./src/ksynth.o ./src/sample.o ./src/voice.o
 
 ifdef WINDOWS
