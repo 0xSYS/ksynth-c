@@ -46,7 +46,6 @@ jobs:
         run: |
           make clean_objs
           make
-          # Strip the correct output file
           strip out/libksynth.so || echo "No libksynth.so found to strip"
 
       - name: Build for ARM64
@@ -78,16 +77,25 @@ jobs:
           make WIN64=YES
           strip out/ksynth_x64.dll || echo "No ksynth_x64.dll found to strip"
 
+  upload:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.7
+        with:
+          fetch-depth: 0
+
       - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release create c${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}
+          gh release create c${{ needs.build.outputs.get_commit_number.outputs.COMMIT_NUMBER }}
 
       - name: Upload artifacts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release upload c${{ steps.get_commit_number.outputs.COMMIT_NUMBER }} out/*
+          gh release upload c${{ needs.build.outputs.get_commit_number.outputs.COMMIT_NUMBER }} out/*
