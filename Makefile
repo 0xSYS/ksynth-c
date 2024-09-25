@@ -64,15 +64,14 @@ else
 	  mkdir -p ./out
 	  emcc $(CFLAGS) $(LDFLAGS) $(EMSCRIPTEN_FLAGS) -o $@ $^ $(LIBS) -s WASM=1
     else
-      ./out/libksynth.so: $(OBJS)
-	  mkdir -p ./out
-	  $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-
       ifeq ($(ARM64),YES)
       ./out/libksynth_arm64.so: $(OBJS)
 	  mkdir -p ./out
 	  $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-      endif
+      else
+      ./out/libksynth.so: $(OBJS)
+	  mkdir -p ./out
+	  $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
     endif
   endif
 endif
