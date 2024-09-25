@@ -18,13 +18,11 @@ endif
 
 ifdef WIN32
 	CC := i686-w64-mingw32-gcc
-	WINDOWS := YES
 	LIBS += -lpthread
 endif
 
 ifdef WIN64
 	CC := x86_64-w64-mingw32-gcc
-	WINDOWS := YES
 	LIBS += -lpthread
 endif
 
@@ -40,61 +38,63 @@ endif
 
 OBJS := ./src/ksynth.o ./src/sample.o ./src/voice.o
 
+# Windows specific DLL targets
 ifdef WINDOWS
   ifdef WIN32
-  ./out/ksynth_x86.dll: $(OBJS)
-	  mkdir -p ./out
-	  $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+    out/ksynth_x86.dll: $(OBJS)
+	    mkdir -p ./out
+	    $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
   endif
   
   ifdef WIN64
-  ./out/ksynth_x64.dll: $(OBJS)
-	  mkdir -p ./out
-	  $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+    out/ksynth_x64.dll: $(OBJS)
+	    mkdir -p ./out
+	    $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
   endif
 else
+  # Linux shared libraries or static libraries
   ifdef STATIC
     ./out/libksynth.a: $(OBJS)
-	  mkdir -p ./out
-	  ar rcs $@ $^
+	    mkdir -p ./out
+	    ar rcs $@ $^
 
     ifeq ($(ARM64),YES)
     ./out/libksynth_arm64.a: $(OBJS)
-	  mkdir -p ./out
-	  ar rcs $@ $^
+	    mkdir -p ./out
+	    ar rcs $@ $^
     endif
     
     ifeq ($(ARMV7),YES)
     ./out/libksynth_armv7.a: $(OBJS)
-	  mkdir -p ./out
-	  ar rcs $@ $^
+	    mkdir -p ./out
+	    ar rcs $@ $^
     endif
   else
     ifeq ($(EMSCRIPTEN),YES)
     ./out/ksynth.js: $(OBJS)
-	  mkdir -p ./out
-	  emcc $(CFLAGS) $(LDFLAGS) $(EMSCRIPTEN_FLAGS) -o $@ $^ $(LIBS) -s WASM=1
+	    mkdir -p ./out
+	    emcc $(CFLAGS) $(LDFLAGS) $(EMSCRIPTEN_FLAGS) -o $@ $^ $(LIBS) -s WASM=1
     else
       ifeq ($(ARM64),YES)
       ./out/libksynth_arm64.so: $(OBJS)
-	  mkdir -p ./out
-	  $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+	    mkdir -p ./out
+	    $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
       else
       ifeq ($(ARMV7),YES)
       ./out/libksynth_armv7.so: $(OBJS)
-	  mkdir -p ./out
-	  $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+	    mkdir -p ./out
+	    $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
       else
       ./out/libksynth.so: $(OBJS)
-	  mkdir -p ./out
-	  $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+	    mkdir -p ./out
+	    $(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
       endif
       endif
     endif
   endif
 endif
 
-all:
+all: 
 	$(MAKE) -C . WIN32=YES
 	$(MAKE) -C . WIN64=YES
 	$(MAKE) -C . ARM64=YES
