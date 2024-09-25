@@ -43,42 +43,42 @@ endif
 OBJS := ./src/ksynth.o ./src/sample.o ./src/voice.o
 
 ifdef WINDOWS
-ifdef WIN32
+	ifdef WIN32
 ./out/ksynth_x86.dll: $(OBJS)
 	mkdir -p ./out
 	$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-endif
-ifdef WIN64
+	endif
+	ifdef WIN64
 ./out/ksynth_x64.dll: $(OBJS)
 	mkdir -p ./out
 	$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-endif
+	endif
 else
-ifdef STATIC
+	ifdef STATIC
 ./out/libksynth.a: $(OBJS)
 	mkdir -p ./out
 	ar rcs $@ $^
-else
-ifeq ($(EMSCRIPTEN),YES)
+	else
+		ifeq ($(EMSCRIPTEN),YES)
 ./out/ksynth.js: $(OBJS)
 	mkdir -p ./out
 	emcc $(CFLAGS) $(LDFLAGS) $(EMSCRIPTEN_FLAGS) -o $@ $^ $(LIBS) -s WASM=1
-else
-	ifdef ARM64
-	$(TARGET): $(OBJS)
-		mkdir -p ./out
-		$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+		else
+			ifdef ARM64
+$(TARGET): $(OBJS)
+	mkdir -p ./out
+	$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+			endif
+			ifdef ARMV7
+$(TARGET): $(OBJS)
+	mkdir -p ./out
+	$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+			endif
+./out/libksynth.so: $(OBJS)
+	mkdir -p ./out
+	$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
+		endif
 	endif
-	ifdef ARMV7
-	$(TARGET): $(OBJS)
-		mkdir -p ./out
-		$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-	endif
-	./out/libksynth.so: $(OBJS)
-		mkdir -p ./out
-		$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-endif
-endif
 endif
 
 all:
