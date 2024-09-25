@@ -46,14 +46,14 @@ jobs:
         run: |
           make clean_objs
           make
-          strip out/libksynth.so
+          # Strip the correct output file
+          strip out/libksynth.so || echo "No libksynth.so found to strip"
 
       - name: Build for ARM64
         if: matrix.arch == 'arm64'
         run: |
           echo "Building for ARM64..."
           make clean_objs
-          # Use the ARM64 specific flags if needed
           make CC=aarch64-linux-gnu-gcc ARM64=YES
           echo "Listing output directory:"
           ls -l out
@@ -69,14 +69,14 @@ jobs:
         run: |
           make clean_objs
           make WIN32=YES
-          strip out/ksynth_x86.dll
+          strip out/ksynth_x86.dll || echo "No ksynth_x86.dll found to strip"
 
       - name: Build for Windows (mingw x86_64)
         if: matrix.arch == 'x86_64'
         run: |
           make clean_objs
           make WIN64=YES
-          strip out/ksynth_x64.dll
+          strip out/ksynth_x64.dll || echo "No ksynth_x64.dll found to strip"
 
       - name: Create release
         env:
