@@ -11,16 +11,24 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        arch: [x86_64, i686, arm64]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.7
         with:
           fetch-depth: 0
 
-      - name: Set up MinGW (i686, x86_64)
+      - name: Set up MinGW (if needed)
+        if: matrix.arch == 'i686' || matrix.arch == 'x86_64'
         run: sudo apt-get install gcc-mingw-w64-i686 gcc-mingw-w64-x86-64
 
       - name: Set up ARM64 cross-compiler
+        if: matrix.arch == 'arm64'
         run: sudo apt-get install gcc-aarch64-linux-gnu build-essential
 
       - name: Get commit number
@@ -32,24 +40,28 @@ jobs:
           sed -i 's/COMMIT_NUMBER_PLACEHOLDER/${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}/g' src/ksynth.c
 
       - name: Build for Linux
+        if: matrix.arch != 'i686' && matrix.arch != 'arm64'
         run: |
           make clean_objs
           make
           strip out/libksynth.so
 
-      - name: Build for Linux (ARM64)
+      - name: Build for ARM64
+        if: matrix.arch == 'arm64'
         run: |
           make clean_objs
           make ARM64=YES
           aarch64-linux-gnu-strip out/libksynth_arm64.so
 
       - name: Build for Windows (mingw i686)
+        if: matrix.arch == 'i686'
         run: |
           make clean_objs
           make WIN32=YES
           strip out/ksynth_x86.dll
 
       - name: Build for Windows (mingw x86_64)
+        if: matrix.arch == 'x86_64'
         run: |
           make clean_objs
           make WIN64=YES
