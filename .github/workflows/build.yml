@@ -40,7 +40,7 @@ jobs:
       - name: Build for Linux (ARM64)
         run: |
           make clean_objs
-          make CC=aarch64-linux-gnu-gcc
+          make ARM64=YES
           aarch64-linux-gnu-strip out/libksynth_arm64.so
 
       - name: Build for Windows (mingw i686)
