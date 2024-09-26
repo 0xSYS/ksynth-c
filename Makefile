@@ -1,6 +1,6 @@
 CC := gcc
 CFLAGS := -D_POSIX_C_SOURCE=199309L -std=c99 -ffast-math
-LDFLAGS := 
+LDFLAGS :=
 LIBS := -lm
 
 ifeq ($(DEBUG),YES)
@@ -16,87 +16,54 @@ endif
 
 .PHONY: all clean format
 
-# Set compiler and flags for Windows
 ifdef WIN32
-	CC := i686-w64-mingw32-gcc
-	WINDOWS := YES
-	LIBS += -lpthread
+    CC := i686-w64-mingw32-gcc
+    WINDOWS := YES
+    LIBS += -lpthread
 endif
 
 ifdef WIN64
-	CC := x86_64-w64-mingw32-gcc
-	WINDOWS := YES
-	LIBS += -lpthread
-endif
-
-# Set compiler and flags for ARM architectures
-ifdef ARM64
-	CC := aarch64-linux-gnu-gcc
-	CFLAGS += -march=armv8-a
-	TARGET := ./out/ksynth_arm64.so
-endif
-
-ifdef ARMV7
-	CC := arm-linux-gnueabi-gcc
-	CFLAGS += -march=armv7-a
-	TARGET := ./out/ksynth_armv7.so
+    CC := x86_64-w64-mingw32-gcc
+    WINDOWS := YES
+    LIBS += -lpthread
 endif
 
 OBJS := ./src/ksynth.o ./src/sample.o ./src/voice.o
 
-# Build rules for Windows
 ifdef WINDOWS
-	ifdef WIN32
+ifdef WIN32
 ./out/ksynth_x86.dll: $(OBJS)
 	mkdir -p ./out
 	$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-	endif
-
-	ifdef WIN64
+endif
+ifdef WIN64
 ./out/ksynth_x64.dll: $(OBJS)
 	mkdir -p ./out
 	$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-	endif
+endif
 else
-	# Build rules for non-Windows
-	ifdef STATIC
+ifdef STATIC
 ./out/libksynth.a: $(OBJS)
 	mkdir -p ./out
 	ar rcs $@ $^
-	else
-		ifeq ($(EMSCRIPTEN),YES)
+else
+ifeq ($(EMSCRIPTEN),YES)
 ./out/ksynth.js: $(OBJS)
 	mkdir -p ./out
 	emcc $(CFLAGS) $(LDFLAGS) $(EMSCRIPTEN_FLAGS) -o $@ $^ $(LIBS) -s WASM=1
-		else
-			ifdef ARM64
-$(TARGET): $(OBJS)
-	mkdir -p ./out
-	$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-			endif
-
-			ifdef ARMV7
-$(TARGET): $(OBJS)
-	mkdir -p ./out
-	$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-			endif
-
+else
 ./out/libksynth.so: $(OBJS)
 	mkdir -p ./out
 	$(CC) $(LDFLAGS) -shared -o $@ $^ $(LIBS)
-		endif
-	endif
+endif
+endif
 endif
 
-# All target to build different versions
 all:
 	$(MAKE) -C . WIN32=YES
 	$(MAKE) -C . WIN64=YES
-	$(MAKE) -C . ARM64=YES
-	$(MAKE) -C . ARMV7=YES
 	$(MAKE) -C .
 
-# Object files rules
 ./src/ksynth.o: ./src/ksynth.c ./src/ksynth.h
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
 
@@ -106,11 +73,9 @@ all:
 ./src/voice.o: ./src/voice.c ./src/voice.h
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
 
-# Format rule
 format:
 	clang-format -i `find . -name "*.h" -or -name "*.c"`
 
-# Clean rules
 clean:
 	rm -rf out $(OBJS)
 

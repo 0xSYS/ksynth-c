@@ -11,27 +11,17 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        arch: [x86_64, i686, arm64]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.7
         with:
           fetch-depth: 0
 
-      - name: Set up MinGW (if needed)
-        if: matrix.arch == 'i686' || matrix.arch == 'x86_64'
+      - name: Set up MinGW (i686, x86_64)
         run: sudo apt-get install gcc-mingw-w64-i686 gcc-mingw-w64-x86-64
 
       - name: Set up ARM64 cross-compiler
-        if: matrix.arch == 'arm64'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu build-essential
+        run: sudo apt-get install gcc-aarch64-linux-gnu build-essential
 
       - name: Get commit number
         id: get_commit_number
@@ -42,60 +32,39 @@ jobs:
           sed -i 's/COMMIT_NUMBER_PLACEHOLDER/${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}/g' src/ksynth.c
 
       - name: Build for Linux
-        if: matrix.arch != 'i686' && matrix.arch != 'arm64'
         run: |
           make clean_objs
           make
-          strip out/libksynth.so || echo "No libksynth.so found to strip"
+          strip out/libksynth.so
 
-      - name: Build for ARM64
-        if: matrix.arch == 'arm64'
+      - name: Build for Linux (ARM64)
         run: |
-          echo "Building for ARM64..."
           make clean_objs
-          make CC=aarch64-linux-gnu-gcc ARM64=YES
-          echo "Listing output directory:"
-          ls -l out
-          if [ -f out/libksynth_arm64.so ]; then
-            aarch64-linux-gnu-strip out/libksynth_arm64.so
-          else
-            echo "ARM64 build did not produce out/libksynth_arm64.so"
-            exit 1
-          fi
+          make CC=aarch64-linux-gnu-gcc
+          aarch64-linux-gnu-strip out/libksynth_arm64.so
 
       - name: Build for Windows (mingw i686)
-        if: matrix.arch == 'i686'
         run: |
           make clean_objs
           make WIN32=YES
-          strip out/ksynth_x86.dll || echo "No ksynth_x86.dll found to strip"
+          strip out/ksynth_x86.dll
 
       - name: Build for Windows (mingw x86_64)
-        if: matrix.arch == 'x86_64'
         run: |
           make clean_objs
           make WIN64=YES
-          strip out/ksynth_x64.dll || echo "No ksynth_x64.dll found to strip"
-
-  upload:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.1.7
-        with:
-          fetch-depth: 0
+          strip out/ksynth_x64.dll
 
       - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release create c${{ needs.build.outputs.get_commit_number.outputs.COMMIT_NUMBER }}
+          gh release create c${{ steps.get_commit_number.outputs.COMMIT_NUMBER }}
 
       - name: Upload artifacts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release upload c${{ needs.build.outputs.get_commit_number.outputs.COMMIT_NUMBER }} out/*
+          gh release upload c${{ steps.get_commit_number.outputs.COMMIT_NUMBER }} out/*
