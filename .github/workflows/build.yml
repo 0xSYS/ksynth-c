@@ -20,9 +20,6 @@ jobs:
       - name: Set up MinGW (i686, x86_64)
         run: sudo apt-get install gcc-mingw-w64-i686 gcc-mingw-w64-x86-64
 
-      - name: Set up ARM64 cross-compiler
-        run: sudo apt-get install gcc-aarch64-linux-gnu build-essential
-
       - name: Get commit number
         id: get_commit_number
         run: echo "COMMIT_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
@@ -36,12 +33,6 @@ jobs:
           make clean_objs
           make
           strip out/libksynth.so
-
-      - name: Build for Linux (ARM64)
-        run: |
-          make clean_objs
-          make CC=aarch64-linux-gnu-gcc
-          aarch64-linux-gnu-strip out/libksynth_arm64.so
 
       - name: Build for Windows (mingw i686)
         run: |
