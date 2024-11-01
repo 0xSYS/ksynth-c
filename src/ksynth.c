@@ -131,22 +131,22 @@ struct Sample** int_allocate_samples(const char* path, unsigned char keys, struc
 }
 
 int ksynth_get_commit_number(void) {
-    const char* commit_number_str = "CommitNumber: COMMIT_NUMBER_PLACEHOLDER";
-    int n = 0;
-    bool found = false;
+	const char* commit_number_str = "CommitNumber: COMMIT_NUMBER_PLACEHOLDER";
+	int n = 0;
+	bool found = false;
 
-    for(int i = 0; commit_number_str[i] != 0; i++) {
-        if(commit_number_str[i] >= '0' && commit_number_str[i] <= '9') {
-            found = true;
-            n *= 10;
-            n += commit_number_str[i] - '0';
-        } else if(found) {
-            /* non-number char after number */
-            break;
-        }
-    }
-    if(!found) return -1;
-    return n;
+	for(int i = 0; commit_number_str[i] != 0; i++) {
+		if(commit_number_str[i] >= '0' && commit_number_str[i] <= '9') {
+			found = true;
+			n *= 10;
+			n += commit_number_str[i] - '0';
+		} else if(found) {
+			/* non-number char after number */
+			break;
+		}
+	}
+	if(!found) return -1;
+	return n;
 }
 
 struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate, unsigned char num_channel, unsigned int max_polyphony, bool release_oldest_instance) {
@@ -473,12 +473,31 @@ float* ksynth_generate_buffer(struct KSynth* ksynth_instance, unsigned int buffe
 		return NULL;
 	}
 
-	if (buffer_size < MIN_BUF) {
-			fprintf(stderr, "[KSynth] Warning: buffer_size is less than MIN_BUF! Clamping to %d...\n", MIN_BUF);
-			buffer_size = MIN_BUF;
-	} else if (buffer_size >= MAX_BUF) {
-			fprintf(stderr, "[KSynth] Warning: buffer_size is greater than or equal to MAX_BUF! Clamping to %d...\n", MAX_BUF);
-			buffer_size = MAX_BUF;
+	unsigned int num_channels = ksynth_instance->channels;
+	unsigned int min_buffer_size = MIN_BUF * num_channels;
+
+	if(buffer_size < min_buffer_size) {
+		fprintf(stderr, "[KSynth] Warning: buffer_size is less than %d! Returning empty buffer...\n", min_buffer_size);
+
+		float* empty_buffer = malloc(min_buffer_size * sizeof(float));
+		if(empty_buffer) {
+			memset(empty_buffer, 0, min_buffer_size * sizeof(float));
+			return empty_buffer;
+		} else {
+			fprintf(stderr, "[KSynth] Error: Failed to create empty buffer!\n");
+			return NULL;
+		}
+	} else if(buffer_size > MAX_BUF) {
+		fprintf(stderr, "[KSynth] Warning: buffer_size is greater than %d! Returning empty buffer...\n", MAX_BUF);
+
+		float* empty_buffer = malloc(MAX_BUF * sizeof(float));
+		if(empty_buffer) {
+			memset(empty_buffer, 0, MAX_BUF * sizeof(float));
+			return empty_buffer;
+		} else {
+			fprintf(stderr, "[KSynth] Error: Failed to create empty buffer!\n");
+			return NULL;
+		}
 	}
 
 	float* buffer = malloc(buffer_size * sizeof(float));
