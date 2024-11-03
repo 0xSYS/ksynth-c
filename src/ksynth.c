@@ -149,7 +149,7 @@ int ksynth_get_commit_number(void) {
 	return n;
 }
 
-struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate, unsigned char num_channel, unsigned int max_polyphony, bool release_oldest_instance) {
+struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate, unsigned char num_channel, unsigned int max_polyphony, bool release_oldest_instance_on_note_off) {
 	struct KSynth* ksynth_instance = calloc(1, sizeof(struct KSynth));
 	if(ksynth_instance != NULL) {
 		// HARDCODED?
@@ -158,7 +158,7 @@ struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate
 		ksynth_instance->num_channel = num_channel >= 2 ? 2 : num_channel;
 		ksynth_instance->polyphony = 0;
 		ksynth_instance->max_polyphony = max_polyphony;
-		ksynth_instance->release_oldest_instance = release_oldest_instance;
+		ksynth_instance->release_oldest_instance_on_note_off = release_oldest_instance_on_note_off;
 
 		ksynth_instance->voices = int_allocate_voices(ksynth_instance);
 		if(ksynth_instance->voices) {
@@ -253,7 +253,7 @@ void ksynth_note_off(struct KSynth* ksynth_instance, unsigned char channel, unsi
 		voice = ksynth_instance->voices[i];
 
 		if((voice->channel == channel && note == voice->noteNumber) && (!voice->killed && !voice->tokill)) {
-			if(ksynth_instance->release_oldest_instance) {
+			if(ksynth_instance->release_oldest_instance_on_note_off) {
 				voice->tokill = 1;
 				break;
 			} else {
@@ -342,13 +342,22 @@ bool ksynth_set_max_polyphony(struct KSynth* ksynth_instance, unsigned int max_p
 	return false;
 }
 
-void ksynth_set_release_oldest_instance(struct KSynth* ksynth_instance, bool release_oldest) {
+bool ksynth_get_release_oldest_instance_on_note_off(struct KSynth* ksynth_instance) {
 	if(!ksynth_instance) {
 		fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
 		return;
 	}
 
-	ksynth_instance->release_oldest_instance = release_oldest;
+	return ksynth_instance->release_oldest_instance_on_note_off;
+}
+
+void ksynth_set_release_oldest_instance_on_note_off(struct KSynth* ksynth_instance, bool release_oldest_instance_on_note_off) {
+	if(!ksynth_instance) {
+		fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
+		return;
+	}
+
+	ksynth_instance->release_oldest_instance_on_note_off = release_oldest_instance_on_note_off;
 }
 
 void ksynth_fill_buffer(struct KSynth* ksynth_instance, float* buffer, unsigned int buffer_size) {

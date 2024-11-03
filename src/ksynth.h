@@ -38,7 +38,7 @@ struct KSynth {
 	float rendering_time;
 	struct Chan channels[16];
 	struct Voice** voices;
-	bool release_oldest_instance;
+	bool release_oldest_instance_on_note_off;
 };
 
 /**
@@ -73,7 +73,7 @@ int ksynth_get_commit_number(void);
  * @param sample_rate Sample rate
  * @param num_channel Number of channels (1-2)
  * @param max_polyphony Maximum polyphony (1-100,000)
- * @param release_oldest_instance If true, only the oldest instance of the note will be released on note_off; otherwise, all instances of the note on the given channel will be released.
+ * @param release_oldest_instance_on_note_off If true, only the oldest instance of the note will be released on note_off; otherwise, all instances of the note on the given channel will be released.
  * @return A pointer to the newly created KSynth instance on success, NULL on failure.
  *
  * @~japanese
@@ -90,10 +90,10 @@ int ksynth_get_commit_number(void);
  * @param sample_rate サンプルレート
  * @param num_channel チャンネル数（1〜2）
  * @param max_polyphony 最大ポリフォニー（1〜100,000）
- * @param release_oldest_instance ノートオフの際に最も古いインスタンスのみをリリースする場合は true、すべてのインスタンスをリリースする場合は false。
+ * @param release_oldest_instance_on_note_off ノートオフの際に最も古いインスタンスのみをリリースする場合は true、すべてのインスタンスをリリースする場合は false。
  * @return 成功した場合は新しいKSynthインスタンスへのポインタ、失敗した場合はNULL
  */
-struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate, unsigned char num_channel, unsigned int max_polyphony, bool release_oldest_instance);
+struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate, unsigned char num_channel, unsigned int max_polyphony, bool release_oldest_instance_on_note_off);
 
 /**
  * @~english
@@ -216,18 +216,43 @@ bool ksynth_set_max_polyphony(struct KSynth* ksynth_instance, unsigned int max_p
 
 /**
  * @~english
+ * @brief Retrieves the setting for releasing only the oldest note instance on note off.
+ *
+ * This function checks the KSynth instance setting for handling note-off events.
+ * It returns whether only the oldest instance of a note is released when a note-off event occurs.
+ * If the setting is `true`, only the oldest instance of the note will be released.
+ * If `false`, all instances of the note on the specified channel are released.
+ *
+ * @param ksynth_instance Pointer to the KSynth instance.
+ * @return `true` if only the oldest note instance is released on note off, `false` if all instances are released.
+ *
+ * @~japanese
+ * @brief ノートオフ時に最も古いノートインスタンスのみをリリースする設定を取得します。
+ *
+ * この関数は、KSynthインスタンスにおけるノートオフ時の設定を確認します。
+ * ノートオフイベントが発生した際に、最も古いノートインスタンスのみがリリースされるかどうかを返します。
+ * この設定が`true`の場合、最も古いインスタンスのみがリリースされます。
+ * `false`の場合、指定されたチャンネルのすべてのインスタンスがリリースされます。
+ *
+ * @param ksynth_instance KSynthインスタンスへのポインタ。
+ * @return 最も古いノートインスタンスのみがリリースされる場合は`true`、すべてのインスタンスがリリースされる場合は`false`を返します。
+ */
+bool ksynth_get_release_oldest_instance_on_note_off(struct KSynth* ksynth_instance);
+
+/**
+ * @~english
  * @brief Sets whether to release only the oldest note instance on note off.
  *
  * @param ksynth_instance Pointer to the KSynth instance
- * @param release_oldest_instance If true, only the oldest instance of the note is released on note off. If false, all instances of the note on the specified channel are released.
+ * @param release_oldest_instance_on_note_off If true, only the oldest instance of the note is released on note off. If false, all instances of the note on the specified channel are released.
  *
  * @~japanese
  * @brief ノートオフ時に最も古いノートインスタンスのみをリリースするかどうかを設定します。
  *
  * @param ksynth_instance KSynthインスタンスへのポインタ
- * @param release_oldest_instance trueの場合、ノートオフ時に指定されたチャンネルのノートの最も古いインスタンスのみがリリースされます。falseの場合、指定されたチャンネルのノートのすべてのインスタンスがリリースされます。
+ * @param release_oldest_instance_on_note_off trueの場合、ノートオフ時に指定されたチャンネルのノートの最も古いインスタンスのみがリリースされます。falseの場合、指定されたチャンネルのノートのすべてのインスタンスがリリースされます。
  */
-void ksynth_set_release_oldest_instance(struct KSynth* ksynth_instance, bool release_oldest);
+void ksynth_set_release_oldest_instance_on_note_off(struct KSynth* ksynth_instance, bool release_oldest_instance_on_note_off);
 
 /**
  * @~english
