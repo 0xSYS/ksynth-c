@@ -2,7 +2,7 @@
 
 #define MAX_KEYS 128
 #define MAX_POLYPHONY 100000
-#define MIN_BUF 8
+#define MIN_BUF 2
 #define MAX_BUF 65536
 
 #define RELEASE_TIME 300
@@ -345,7 +345,7 @@ bool ksynth_set_max_polyphony(struct KSynth* ksynth_instance, unsigned int max_p
 bool ksynth_get_release_oldest_instance_on_note_off(struct KSynth* ksynth_instance) {
 	if(!ksynth_instance) {
 		fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
-		return;
+		return NULL;
 	}
 
 	return ksynth_instance->release_oldest_instance_on_note_off;
@@ -482,11 +482,13 @@ float* ksynth_generate_buffer(struct KSynth* ksynth_instance, unsigned int buffe
 		return NULL;
 	}
 
-	unsigned int num_channels = ksynth_instance->channels;
+	unsigned int num_channels = ksynth_instance->num_channel;
 	unsigned int min_buffer_size = MIN_BUF * num_channels;
 
+	printf("[KSynth] Debug: buffer_size = %u\n", buffer_size);
+
 	if(buffer_size < min_buffer_size) {
-		fprintf(stderr, "[KSynth] Warning: buffer_size is less than %d! Returning empty buffer...\n", min_buffer_size);
+		fprintf(stderr, "[KSynth] Warning: buffer_size is less than %u! Returning empty buffer...\n", min_buffer_size);
 
 		float* empty_buffer = malloc(min_buffer_size * sizeof(float));
 		if(empty_buffer) {
@@ -497,7 +499,7 @@ float* ksynth_generate_buffer(struct KSynth* ksynth_instance, unsigned int buffe
 			return NULL;
 		}
 	} else if(buffer_size > MAX_BUF) {
-		fprintf(stderr, "[KSynth] Warning: buffer_size is greater than %d! Returning empty buffer...\n", MAX_BUF);
+		fprintf(stderr, "[KSynth] Warning: buffer_size is greater than %u! Returning empty buffer...\n", MAX_BUF);
 
 		float* empty_buffer = malloc(MAX_BUF * sizeof(float));
 		if(empty_buffer) {
