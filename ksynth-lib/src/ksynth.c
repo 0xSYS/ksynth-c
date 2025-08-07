@@ -222,7 +222,6 @@ struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate
 
 void ksynth_note_on(struct KSynth* ksynth_instance, unsigned char channel, unsigned char note, unsigned char velocity)
 {
-  printf("Noteon\n");
 	if(!ksynth_instance || !ksynth_instance->voices || channel > 15 || note > (MAX_KEYS - 1) || velocity > 127)
   {
 		fprintf(stderr, "[KSynth] Error: Invalid parameters for note on.\n");
@@ -290,7 +289,6 @@ void ksynth_note_on(struct KSynth* ksynth_instance, unsigned char channel, unsig
 
 void ksynth_note_off(struct KSynth* ksynth_instance, unsigned char channel, unsigned char note)
 {
-  printf("Noteoff\n");
 	if(!ksynth_instance || channel > 15 || note > (MAX_KEYS - 1))
   {
 		fprintf(stderr, "[KSynth] Error: Invalid parameters for note off.\n");
