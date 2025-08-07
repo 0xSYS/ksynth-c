@@ -1,5 +1,6 @@
 {
   "files.associations": {
-    "xmmintrin.h": "c"
+    "xmmintrin.h": "c",
+    "audio_device.h": "c"
   }
 }

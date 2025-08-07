@@ -3,6 +3,7 @@ add_rules("mode.debug", "mode.release")
 target("ksynth")
     set_kind("shared")
     add_defines("KSYNTH_MSVC_TESTING")
+    add_includedirs("../ext_deps/tinysf/", "../ext_deps/midiaudio/", "../ext_deps/log_c/")
     add_files("src/*.c", "src/core/*.c", "src/output/*.c", "src/soundfont/*c")
 
 --

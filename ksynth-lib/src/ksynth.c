@@ -179,7 +179,8 @@ int ksynth_get_commit_number(void)
 	return n;
 }
 
-struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate, unsigned char num_channel, unsigned int max_polyphony, bool release_oldest_instance_on_note_off) {
+struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate, unsigned char num_channel, unsigned int max_polyphony, bool release_oldest_instance_on_note_off)
+{
 	struct KSynth* ksynth_instance = calloc(1, sizeof(struct KSynth));
 	if(ksynth_instance != NULL)
   {
@@ -228,9 +229,11 @@ void ksynth_note_on(struct KSynth* ksynth_instance, unsigned char channel, unsig
 		return;
 	}
 
-	if(velocity < 1) ksynth_note_off(ksynth_instance, channel, note);
+	if(velocity < 1)
+    ksynth_note_off(ksynth_instance, channel, note);
 
-	if(channel == 9) return;
+	if(channel == 9)
+    return;
 
 	struct Voice* voice = 0;
 
@@ -295,7 +298,8 @@ void ksynth_note_off(struct KSynth* ksynth_instance, unsigned char channel, unsi
 		return;
 	}
 
-	if(channel == 9) return;
+	if(channel == 9)
+    return;
 
 	struct Voice* voice = 0;
 
@@ -346,7 +350,8 @@ void ksynth_cc(struct KSynth* ksynth_instance, unsigned char channel, unsigned c
 		return;
 	}
 
-	if(channel == 9) return;
+	if(channel == 9)
+    return;
 
 	switch(param1)
   {
