@@ -39,7 +39,8 @@ extern "C" {
 #define M_PI 3.14159265358979323846264338327950288
 #endif
 
-struct KSynth {
+struct KSynth
+{
 	struct Sample** samples;
 	unsigned int sample_rate;
 	unsigned char num_channel;
@@ -68,6 +69,13 @@ struct KSynth {
  * @return KSynthのコミット数、失敗時には-1
  */
 KSYNTH_API int ksynth_get_commit_number(void);
+
+
+/*
+Load samples from a soundfont
+more info soon
+*/
+KSYNTH_API void ksynth_load_soundfont_samples(const char * path);
 
 /**
  * @~english

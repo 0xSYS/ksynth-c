@@ -1,73 +1,138 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+#include <log_c/log.h>
 
 
 #include "sf2.h"
-#include "../core/sample.h"
-
-#define TSF_IMPLEMENTATION
-#include <tsf.h>
+#include "../ksynth.h"
 
 
 
+/*
+Todo: Store sample data into Sample.audio_data
+*/
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-bool load_preset_to_sample(const char* sf2_path, int bank, int preset, int midi_note, float duration_seconds, struct Sample* out_sample)
+void read_phdr(FILE* f, uint32_t size)
 {
-    tsf* synth = tsf_load_filename(sf2_path);
-    if (!synth)
+  size_t count = size / sizeof(PresetHeader);
+  PresetHeader* presets = malloc(size);
+  fread(presets, 1, size, f);
+
+  printf("Presets:\n");
+  for (size_t i = 0; i < count - 1; i++) // last is EOP terminator
+  {
+    printf("  [%2zu] %s (Bank %d, Preset %d)\n", i, presets[i].presetName, presets[i].bank, presets[i].preset);
+  }
+
+  free(presets);
+}
+
+void read_shdr(FILE* f, uint32_t size)
+{
+  size_t count = size / sizeof(SampleHeader);
+  SampleHeader* samples = malloc(size);
+  fread(samples, 1, size, f);
+
+  printf("Samples:\n");
+  for(size_t i = 0; i < count - 1; i++) // last is EOS terminator
+  {
+    printf("  [%2zu] %s (Start: %u, End: %u, Rate: %u)\n", i, samples[i].sampleName, samples[i].start, samples[i].end, samples[i].sampleRate);
+  }
+
+  free(samples);
+}
+
+long find_list_chunk(FILE* f, const char* target_type)
+{
+  fseek(f, sizeof(RiffChunkHeader), SEEK_SET);  // Skip RIFF header
+
+  ChunkHeader chunk;
+  while(fread(&chunk, sizeof(chunk), 1, f) == 1)
+  {
+    long chunk_data_start = ftell(f);
+
+    if(memcmp(chunk.id, "LIST", 4) == 0)
     {
-      fprintf(stderr, "Failed to load SF2: %s\n", sf2_path);
-      return false;
+      char list_type[4];
+      if(fread(list_type, 1, 4, f) != 4)
+        break;
+          
+      if(memcmp(list_type, target_type, 4) == 0)
+      {
+        return ftell(f);  // Found target
+      }
     }
+      
+    uint32_t padded_size = (chunk.size + 1) & ~1;
+    fseek(f, chunk_data_start + padded_size, SEEK_SET);
+  }
+    
+  return -1;
+}
 
-    int samplerate = 44100;
-    tsf_set_output(synth, TSF_STEREO_INTERLEAVED, samplerate, 0.0f);
 
-    // How many frames to render?
-    int frame_count = (int)(duration_seconds * samplerate);
+void ksynth_load_soundfont_samples(const char * path)
+{
+  FILE* f = fopen(path, "rb");
+  if(!f)
+  {
+    log_error("Failed to open soundfont file !!!");
+    perror("fopen");
+    return;
+  }
 
-    // Each frame has 2 samples (stereo)
-    int total_samples = frame_count * 2;
+  RiffChunkHeader riff;
+  fread(&riff, sizeof(riff), 1, f);
 
-    // Allocate audio buffer
-    int16_t* buffer = malloc(sizeof(int16_t) * total_samples);
-    if(!buffer)
-    {
-      fprintf(stderr, "Out of memory\n");
-      tsf_close(synth);
-      return false;
-    }
+  if(memcmp(riff.id, "RIFF", 4) != 0 || memcmp(riff.type, "sfbk", 4) != 0)
+  {
+    log_error("Invalid soundfont file");
+    fclose(f);
+    return;
+  }
 
-    // Note ON
-    tsf_note_on(synth, preset, midi_note, 1.0f);
+  long pdta_offset = find_list_chunk(f, "pdta");
+  if(pdta_offset < 0)
+  {
+    log_error("Missing PDTA header !!!");
+    fclose(f);
+    return;
+  }
 
-    // Render audio
-    tsf_render_short(synth, buffer, frame_count, 0);
+  fseek(f, pdta_offset - sizeof(ChunkHeader), SEEK_SET);
 
-    // Note OFF
-    tsf_note_off(synth, preset, midi_note);
+  ChunkHeader pdta_header;
+  if(fread(&pdta_header, sizeof(pdta_header), 1, f) != 1)
+  {
+    log_error("Failed to read PDTA list chunk !!!");
+    fclose(f);
+    return;
+  }
 
-    // Store in Sample struct
-    out_sample->audio_data = buffer;
-    out_sample->sample_rate = samplerate;
-    out_sample->length = frame_count;
+  uint32_t pdta_end = ftell(f) + pdta_header.size;
 
-    tsf_close(synth);
-    return true;
+  while((uint32_t)ftell(f) < pdta_end)
+  {
+      ChunkHeader subchunk;
+      if(fread(&subchunk, sizeof(subchunk), 1, f) != 1)
+          break;
+      
+      long sub_start = ftell(f);
+      
+      if(memcmp(subchunk.id, "phdr", 4) == 0)
+      {
+        read_phdr(f, subchunk.size);
+      }
+      else if(memcmp(subchunk.id, "shdr", 4) == 0)
+      {
+        read_shdr(f, subchunk.size);
+      }
+      else
+      {
+        fseek(f, sub_start + ((subchunk.size + 1) & ~1), SEEK_SET);
+      }
+  }
+    
+  fclose(f);
 }

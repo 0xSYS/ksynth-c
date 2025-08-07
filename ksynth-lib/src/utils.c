@@ -11,17 +11,17 @@ static double rendering_time_freq;
 
 void init_timer()
 {
-    LARGE_INTEGER freq;
-    QueryPerformanceFrequency(&freq);
-    rendering_time_freq = (double)freq.QuadPart;
+  LARGE_INTEGER freq;
+  QueryPerformanceFrequency(&freq);
+  rendering_time_freq = (double)freq.QuadPart;
 }
 
 void get_time(struct timespec* ts)
 {
-    LARGE_INTEGER now;
-    QueryPerformanceCounter(&now);
-    ts->tv_sec = (time_t)(now.QuadPart / rendering_time_freq);
-    ts->tv_nsec = (long)(((now.QuadPart % (LONGLONG)rendering_time_freq) * 1e9) / rendering_time_freq);
+  LARGE_INTEGER now;
+  QueryPerformanceCounter(&now);
+  ts->tv_sec = (time_t)(now.QuadPart / rendering_time_freq);
+  ts->tv_nsec = (long)(((now.QuadPart % (LONGLONG)rendering_time_freq) * 1e9) / rendering_time_freq);
 }
 #else
 #include <time.h>

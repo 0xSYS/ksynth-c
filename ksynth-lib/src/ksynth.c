@@ -1,4 +1,5 @@
 #include <time.h>
+#include <log_c/log.h>
 
 
 
@@ -112,7 +113,8 @@ struct Sample** int_allocate_samples(const char* path, unsigned char keys, struc
 		FILE* f = fopen(path, "rb");
 		if(f == NULL)
     {
-			fprintf(stderr, "[KSynth] Error: Failed to open sample file.\n");
+			//fprintf(stderr, "[KSynth] Error: Failed to open sample file.\n");
+      log_error("Failed to open sample !!!");
 			free(samples);
 			return NULL;
 		}
@@ -125,7 +127,8 @@ struct Sample** int_allocate_samples(const char* path, unsigned char keys, struc
       {
 				int_free_samples(samples, i);
 
-				fprintf(stderr, "[KSynth] Error: Failed to allocate memory for sample struct.\n");
+				//fprintf(stderr, "[KSynth] Error: Failed to allocate memory for sample struct.\n");
+        log_error("Failed to allocate memory for sample structure !!!");
 				return NULL;
 			}
 
@@ -139,7 +142,8 @@ struct Sample** int_allocate_samples(const char* path, unsigned char keys, struc
       {
 				int_free_samples(samples, i);
 
-				fprintf(stderr, "[KSynth] Error: Failed to allocate memory for samples data.\n");
+				//fprintf(stderr, "[KSynth] Error: Failed to allocate memory for samples data.\n");
+        log_error("Failed to allocate memory for sample data !!!");
 				return NULL;
 			}
 
@@ -151,7 +155,8 @@ struct Sample** int_allocate_samples(const char* path, unsigned char keys, struc
 		return samples;
 	}
 
-	fprintf(stderr, "[KSynth] Error: Failed to open samples file.\n");
+	//fprintf(stderr, "[KSynth] Error: Failed to open samples file.\n");
+  log_error("Failed to open sample file");
 	return NULL;
 }
 
@@ -206,18 +211,21 @@ struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate
 			}
       else
       {
-				fprintf(stderr, "[KSynth] Error: Failed to allocate memory for samples.\n");
+				//fprintf(stderr, "[KSynth] Error: Failed to allocate memory for samples.\n");
+        log_error("Failed to allocate memory for samples !!!");
 				return NULL;
 			}
 		}
     else
     {
-			fprintf(stderr, "[KSynth] Error: Failed to allocate memory for voices.\n");
+			//fprintf(stderr, "[KSynth] Error: Failed to allocate memory for voices.\n");
+      log_error("Failed to allocate memory for voices !!!");
 			return NULL;
 		}
 	}
 
-	fprintf(stderr, "[KSynth] Error: Failed to allocate memory for KSynth instance.\n");
+	//fprintf(stderr, "[KSynth] Error: Failed to allocate memory for KSynth instance.\n");
+  log_error("Failed to allocate memory for KSynth instance !!!");
 	return NULL;
 }
 
@@ -225,7 +233,8 @@ void ksynth_note_on(struct KSynth* ksynth_instance, unsigned char channel, unsig
 {
 	if(!ksynth_instance || !ksynth_instance->voices || channel > 15 || note > (MAX_KEYS - 1) || velocity > 127)
   {
-		fprintf(stderr, "[KSynth] Error: Invalid parameters for note on.\n");
+		//fprintf(stderr, "[KSynth] Error: Invalid parameters for note on.\n");
+    log_error("Invalid parameters for note on event !!!");
 		return;
 	}
 
@@ -294,7 +303,8 @@ void ksynth_note_off(struct KSynth* ksynth_instance, unsigned char channel, unsi
 {
 	if(!ksynth_instance || channel > 15 || note > (MAX_KEYS - 1))
   {
-		fprintf(stderr, "[KSynth] Error: Invalid parameters for note off.\n");
+		//fprintf(stderr, "[KSynth] Error: Invalid parameters for note off.\n");
+    log_error("Invalid parameters for note off event !!!");
 		return;
 	}
 
@@ -346,7 +356,8 @@ void ksynth_note_off_all(struct KSynth* ksynth_instance)
 void ksynth_cc(struct KSynth* ksynth_instance, unsigned char channel, unsigned char param1, unsigned char param2) {
 	if(!ksynth_instance || channel > 15)
   {
-		fprintf(stderr, "[KSynth] Error: Invalid parameters for CC.\n");
+		//fprintf(stderr, "[KSynth] Error: Invalid parameters for CC.\n");
+    log_error("Invalid parameters for CC events");
 		return;
 	}
 
@@ -371,7 +382,8 @@ unsigned int ksynth_get_polyphony(struct KSynth* ksynth_instance)
 {
 	if(!ksynth_instance)
   {
-		fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
+		//fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
+    log_error("Invalid KSynth instance !!!");
 		return -1;
 	}
 
@@ -382,7 +394,8 @@ unsigned int ksynth_get_max_polyphony(struct KSynth* ksynth_instance)
 {
 	if(!ksynth_instance)
   {
-		fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
+		//fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
+    log_error("Invalid KSynth instance !!!");
 		return -1;
 	}
 
@@ -410,7 +423,8 @@ bool ksynth_set_max_polyphony(struct KSynth* ksynth_instance, unsigned int max_p
 	}
 	ksynth_instance->max_polyphony = old_count;
 
-	fprintf(stderr, "[KSynth] Error: Failed to allocate memory for voices.\n");
+	//fprintf(stderr, "[KSynth] Error: Failed to allocate memory for voices.\n");
+  log_error("Failed to allocate memory for voices !!!");
 	return false;
 }
 
@@ -418,7 +432,8 @@ bool ksynth_get_release_oldest_instance_on_note_off(struct KSynth* ksynth_instan
 {
 	if(!ksynth_instance)
   {
-		fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
+		//fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
+    log_error("Invalid KSynth instance !!!");
 		return NULL;
 	}
 
@@ -429,7 +444,8 @@ void ksynth_set_release_oldest_instance_on_note_off(struct KSynth* ksynth_instan
 {
 	if(!ksynth_instance)
   {
-		fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
+		//fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
+    log_error("Invalid KSynth instance !!!");
 		return;
 	}
 
@@ -442,13 +458,15 @@ void ksynth_fill_buffer(struct KSynth* ksynth_instance, float* buffer, unsigned 
 	// to make use of the new chunk system in OMv2, better strums:tm:!
 	if(ksynth_instance == NULL || ksynth_instance->samples == NULL)
   {
-		fprintf(stderr, "[KSynth] Error: Invalid KSynth instance or no samples loaded.\n");
+		//fprintf(stderr, "[KSynth] Error: Invalid KSynth instance or no samples loaded.\n");
+    log_error("Invalid KSynth instance or missing samples");
 		return;
 	}
 
 	if(!buffer)
   {
-		fprintf(stderr, "[KSynth] Error: Target buffer is not valid.\n");
+		//fprintf(stderr, "[KSynth] Error: Target buffer is not valid.\n");
+    log_error("Invalid target buffer !!!");
 		return;
 	}
 
@@ -573,7 +591,8 @@ float* ksynth_generate_buffer(struct KSynth* ksynth_instance, unsigned int buffe
 	// buffer still limited here for compatibility purposes
 	if(!ksynth_instance || !ksynth_instance->samples)
   {
-		fprintf(stderr, "[KSynth] Error: Invalid KSynth instance or no samples loaded.\n");
+		//fprintf(stderr, "[KSynth] Error: Invalid KSynth instance or no samples loaded.\n");
+    log_error("Invalid KSynth instance or missing samples");
 		return NULL;
 	}
 
@@ -584,7 +603,8 @@ float* ksynth_generate_buffer(struct KSynth* ksynth_instance, unsigned int buffe
 
 	if(buffer_size < min_buffer_size)
   {
-		fprintf(stderr, "[KSynth] Warning: buffer_size is less than %u! Returning empty buffer...\n", min_buffer_size);
+		//fprintf(stderr, "[KSynth] Warning: buffer_size is less than %u! Returning empty buffer...\n", min_buffer_size);
+    log_warn("Buffer size is smaller than %u ! Returning empty buffer...");
 
 		float* empty_buffer = malloc(min_buffer_size * sizeof(float));
 		if(empty_buffer)
@@ -594,13 +614,15 @@ float* ksynth_generate_buffer(struct KSynth* ksynth_instance, unsigned int buffe
 		}
     else
     {
-			fprintf(stderr, "[KSynth] Error: Failed to create empty buffer!\n");
+			//fprintf(stderr, "[KSynth] Error: Failed to create empty buffer!\n");
+      log_error("Failed to create empty buffer !!!");
 			return NULL;
 		}
 	}
   else if(buffer_size > MAX_BUF)
   {
-		fprintf(stderr, "[KSynth] Warning: buffer_size is greater than %u! Returning empty buffer...\n", MAX_BUF);
+		//fprintf(stderr, "[KSynth] Warning: buffer_size is greater than %u! Returning empty buffer...\n", MAX_BUF);
+    log_warn("Buffer size is greater than %u ! Returning empty buffer...");
 
 		float* empty_buffer = malloc(MAX_BUF * sizeof(float));
 		if(empty_buffer)
@@ -610,7 +632,8 @@ float* ksynth_generate_buffer(struct KSynth* ksynth_instance, unsigned int buffe
 		}
     else
     {
-			fprintf(stderr, "[KSynth] Error: Failed to create empty buffer!\n");
+			//fprintf(stderr, "[KSynth] Error: Failed to create empty buffer!\n");
+      log_error("Failed to create empty buffer !!!");
 			return NULL;
 		}
 	}
@@ -623,7 +646,8 @@ float* ksynth_generate_buffer(struct KSynth* ksynth_instance, unsigned int buffe
 		return buffer;
 	}
 
-	fprintf(stderr, "[KSynth] Error: Failed to create buffer!\n");
+	//fprintf(stderr, "[KSynth] Error: Failed to create buffer!\n");
+  log_error("Failed to create buffer !!!");
 	return NULL;
 }
 
@@ -631,7 +655,8 @@ float ksynth_get_rendering_time(struct KSynth* ksynth_instance)
 {
 	if(!ksynth_instance)
   {
-		fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
+		//fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
+    log_error("Invalid KSynth instance !!!");
 		return -1.0f;
 	}
 
@@ -643,12 +668,14 @@ unsigned int ksynth_get_polyphony_for_channel(struct KSynth* ksynth_instance, un
 	if(!ksynth_instance)
   {
 		fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
+    log_error("Invalid KSynth instance !!!");
 		return -1;
 	}
 
 	if(channel < 0 || channel > 15)
   {
-		fprintf(stderr, "[KSynth] Error: Invalid channel number (%d). Channel number must be between 0 and 15.\n", channel);
+		//fprintf(stderr, "[KSynth] Error: Invalid channel number (%d). Channel number must be between 0 and 15.\n", channel);
+    log_error("Invalid MIDI channel number !!! Please use channels ranging from 0 to 15 !");
 		return -1;
 	}
 
