@@ -1,0 +1,8 @@
+# Xmake cache
+ksynth-test/.xmake/
+ksynth-lib/.xmake/
+ksynth-test/build/
+ksynth-lib/build/
+
+# MacOS Cache
+.DS_Store
