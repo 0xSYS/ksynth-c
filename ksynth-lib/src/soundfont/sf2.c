@@ -22,7 +22,7 @@ void read_phdr(FILE* f, uint32_t size)
   printf("Presets:\n");
   for (size_t i = 0; i < count - 1; i++) // last is EOP terminator
   {
-    printf("  [%2zu] %s (Bank %d, Preset %d)\n", i, presets[i].presetName, presets[i].bank, presets[i].preset);
+    printf("Presets -> Index: [%2zu] Preset Name: %s | Bank %d, Preset %d\n", i, presets[i].presetName, presets[i].bank, presets[i].preset);
   }
 
   free(presets);
@@ -34,13 +34,19 @@ void read_shdr(FILE* f, uint32_t size)
   SampleHeader* samples = malloc(size);
   fread(samples, 1, size, f);
 
+  
+
   printf("Samples:\n");
   for(size_t i = 0; i < count - 1; i++) // last is EOS terminator
   {
-    printf("  [%2zu] %s (Start: %u, End: %u, Rate: %u)\n", i, samples[i].sampleName, samples[i].start, samples[i].end, samples[i].sampleRate);
+    char name[21];
+    memcpy(name, samples[i].sampleName, 20);
+    name[20] = '\0';
+    printf("Samples -> Index: [%2zu] | Sample Name: %s | Start: %u, End: %u, Rate: %u\n", i, name, samples[i].start, samples[i].end, samples[i].sampleRate);
   }
 
   free(samples);
+
 }
 
 long find_list_chunk(FILE* f, const char* target_type)

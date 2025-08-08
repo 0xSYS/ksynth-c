@@ -19,6 +19,8 @@ typedef struct
   char type[4];
 }RiffChunkHeader;
 
+// Apparently packing up structs is cucial when storing sf2 data :eyes:
+#pragma pack(push, 1)
 typedef struct
 {
   char presetName[20];
@@ -29,7 +31,9 @@ typedef struct
   uint32_t genre;
   uint32_t morphology;
 }PresetHeader;
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 typedef struct
 {
   char sampleName[20];
@@ -43,6 +47,7 @@ typedef struct
   uint16_t sampleLink;
   uint16_t sampleType;
 }SampleHeader;
+#pragma pack(pop)
 
 
 
