@@ -5,12 +5,16 @@
 
 #include "../utils.h"
 
+#define MAX_SAMPLES 5500
 
+
+#pragma pack(push, 1)
 typedef struct
 {
   char id[4];
   uint32_t size;
 }ChunkHeader;
+#pragma pack(pop)
 
 typedef struct
 {
@@ -48,6 +52,7 @@ typedef struct
   uint16_t sampleType;
 }SampleHeader;
 #pragma pack(pop)
+
 
 
 

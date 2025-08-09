@@ -30,13 +30,43 @@ void Test1()
 
 void Test2()
 {
-    struct Sample sample;
-    ksynth_load_soundfont_samples("C:\\Users\\acer\\Desktop\\BM\\Soundfonts\\Keppys Steinway Piano 7.2.sf2");
+    //struct Sample **samples;
+    //ksynth_load_soundfont_samples("C:\\Users\\acer\\Desktop\\BM\\Soundfonts\\Keppys Steinway Piano 7.2.sf2", samples);
     //if(load_preset_to_sample("C:\\Users\\acer\\Desktop\\BM\\Soundfonts\\Keppys Steinway Piano 7.2.sf2", 0, 0, 60, 2.0f, &sample))
     //{
     //  printf("Loaded sample: %u frames @ %u Hz\n", sample.length, sample.sample_rate);
     //  free(sample.audio_data);
     //}
+
+    struct Sample* sf2_samples = NULL;
+    size_t sample_count = 0;
+
+    // Load samples from a SoundFont
+    ksynth_load_sf2_samples("C:\\Users\\acer\\Desktop\\BM\\Soundfonts\\Keppys Steinway Piano 7.2.sf2", &sf2_samples, &sample_count);
+
+    if(sf2_samples == NULL || sample_count == 0)
+    {
+        printf("No samples loaded.\n");
+        return 1;
+    }
+
+    printf("Loaded %zu samples.\n", sample_count);
+
+    // Iterate through the samples
+    for(size_t i = 0; i < sample_count; i++)
+    {
+        printf("[%zu] Sample rate: %u Hz, length: %u samples\n", i, sf2_samples[i].sample_rate, sf2_samples[i].length);
+    }
+
+    // Free the audio data for each sample
+    for(size_t i = 0; i < sample_count; i++)
+    {
+        printf("Freeing stuff...\n");
+        free(sf2_samples[i].audio_data);
+    }
+
+    // Free the array of samples
+    free(sf2_samples);
 }
 
 void Test3()

@@ -75,7 +75,8 @@ KSYNTH_API int ksynth_get_commit_number(void);
 Load samples from a soundfont
 more info soon
 */
-KSYNTH_API void ksynth_load_soundfont_samples(const char * path);
+//KSYNTH_API void ksynth_load_soundfont_samples(const char * path);
+KSYNTH_API void ksynth_load_sf2_samples(const char * path, struct Sample** sf2_samples, size_t* sample_count);
 
 /**
  * @~english
