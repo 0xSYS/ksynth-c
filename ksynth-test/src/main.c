@@ -113,6 +113,7 @@ void Test2()
     free(sf2_samples);
     */
 
+    /*
     struct Sample* sf2_samples = NULL;
     size_t sample_count = 0;
     
@@ -131,6 +132,7 @@ void Test2()
     
     free(sf2_samples[0].audio_data);
     free(sf2_samples);
+    */
 }
 
 void Test3()
@@ -150,6 +152,52 @@ void Test3()
    // }
 }
 
+void Test4()
+{
+    struct Sample* samples = NULL;
+    unsigned int sample_count = 0;
+    PresetEffects* presets = NULL;
+    unsigned int preset_count = 0;
+    int16_t** preset_gens = NULL;
+
+    int r = ksynth_sf2_load("C:\\Users\\acer\\Desktop\\BM\\Soundfonts\\Arachno SoundFont Version 1.0.sf2", &samples, &sample_count, &presets, &preset_count, &preset_gens);
+    if(r != 0)
+    {
+        fprintf(stderr, "SF2 load failed: %d\n", r);
+        //return 1;
+    }
+
+    printf("Loaded %u samples, %u presets\n", sample_count, preset_count);
+
+    // inspect first sample
+    for(int i = 0; i < sample_count; i++)
+    {
+        printf("Sample Index: %d | SR: %u | LEN: %u | KR -> lk: %u - hk: %u | LOOP -> start: %u - end: %u\n", i, samples[i].sample_rate, samples[i].length, i, samples[i].low_key, samples[i].hi_key, i, samples[i].loop_start, samples[i].loop_end);
+    }
+
+    // inspect preset 0 basic effects
+    for(int i = 0; i < preset_count; i++)
+    {
+        printf("Preset Index: %d | pan: %d | reverb: %d | chorus: %d | Preset Name: %s\n", i, presets[i].pan, presets[i].reverbSend, presets[i].chorusSend, presets[i].name);
+    }
+
+    // free everything
+    for(unsigned int i = 0; i < sample_count; ++i)
+    {
+        if(samples[i].audio_data)
+            free(samples[i].audio_data);
+    }
+    free(samples);
+
+    if(preset_gens)
+    {
+        for(unsigned int p = 0; p < preset_count; ++p) free(preset_gens[p]);
+            free(preset_gens);
+    }
+    free(presets);
+
+}
+
 
 int main(int argc, char** argv) {
 #if defined(_WIN32) || defined(_WIN64)
@@ -157,7 +205,8 @@ int main(int argc, char** argv) {
 #endif
     printf("hello world!\n");
     //Test1();
-    Test2();
+    //Test2();
     //Test3();
+    Test4();
     return 0;
 }
