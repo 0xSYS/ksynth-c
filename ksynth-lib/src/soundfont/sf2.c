@@ -9,7 +9,7 @@
 
 
 /*
-Todo: Get sample loop
+Todo: Get sample effects
 */
 
 
