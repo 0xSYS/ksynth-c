@@ -591,7 +591,9 @@ int ksynth_sf2_load(const char* path, struct Sample** out_samples, unsigned int*
           if(!preset_gens[i])
           {
             // free previously allocated
-            for (size_t j = 0; j < i; ++j) free(preset_gens[j]);
+            for(size_t j = 0; j < i; ++j)
+              free(preset_gens[j]);
+
             free(preset_gens);
             preset_gens = NULL;
             break;
