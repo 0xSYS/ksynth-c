@@ -81,6 +81,7 @@ void Test2()
     //  free(sample.audio_data);
     //}
 
+    /*
     struct Sample* sf2_samples = NULL;
     size_t sample_count = 0;
 
@@ -109,6 +110,26 @@ void Test2()
     }
 
     // Free the array of samples
+    free(sf2_samples);
+    */
+
+    struct Sample* sf2_samples = NULL;
+    size_t sample_count = 0;
+    
+    ksynth_load_sf2_samples("C:\\Users\\acer\\Desktop\\BM\\Soundfonts\\Keppys Steinway Piano 7.2.sf2", &sf2_samples, &sample_count);
+    
+    printf("Loaded %zu samples\n", sample_count);
+    
+    for (size_t i = 0; i < sample_count; i++)
+    {
+        printf("Sample %zu: rate=%u length=%u keys=%u-%u\n", i, sf2_samples[i].sample_rate, sf2_samples[i].length, sf2_samples[i].low_key, sf2_samples[i].hi_key);
+    }
+    
+    // Don't forget to free the allocated audio_data buffer too
+    // The audio_data pointers all point into one big malloc block allocated as sample_data inside the loader.
+    // So free sf2_samples[0].audio_data (or samples[0].audio_data) once you're done:
+    
+    free(sf2_samples[0].audio_data);
     free(sf2_samples);
 }
 

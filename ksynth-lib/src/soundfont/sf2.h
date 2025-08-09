@@ -6,6 +6,7 @@
 #include "../utils.h"
 
 #define MAX_SAMPLES 5500
+#define GEN_KEYRANGE 43
 
 
 #pragma pack(push, 1)
@@ -51,6 +52,30 @@ typedef struct
   uint16_t sampleLink;
   uint16_t sampleType;
 }SampleHeader;
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+typedef struct
+{
+  char instName[20];
+  uint16_t instBagNdx;
+}Instrument;
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+typedef struct
+{
+  uint16_t genIndex;
+  uint16_t modIndex;
+}InstBag;
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+typedef struct
+{
+  uint16_t genOper;
+  int16_t genAmount;
+}InstGen;
 #pragma pack(pop)
 
 

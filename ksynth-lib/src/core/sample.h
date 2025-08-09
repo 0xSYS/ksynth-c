@@ -11,6 +11,8 @@ struct Sample
 	int16_t* audio_data;
 	unsigned int sample_rate;
 	unsigned int length;
+  uint8_t low_key;
+  uint8_t hi_key;
 };
 
 void sample_free(struct Sample* sample);

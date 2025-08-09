@@ -6,7 +6,8 @@ extern "C" {
 
 #include <stdbool.h>
 
-struct Voice {
+struct Voice
+{
 	unsigned char killed;
 	unsigned char tokill;
 	unsigned char channel;

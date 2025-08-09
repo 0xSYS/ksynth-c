@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-/*
+
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 
@@ -19,21 +19,21 @@ void audio_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_ui
   memset(out, 0, frameCount * sizeof(int16_t) * 2); // stereo zeroed
 
   // Example: Mix one sample (mono)
-  if(your_sample_is_active)
-  {
-    for(ma_uint32 i = 0; i < frameCount; ++i)
-    {
-      out[i * 2 + 0] += your_sample_data[your_sample_pos]; // Left
-      out[i * 2 + 1] += your_sample_data[your_sample_pos]; // Right
-      your_sample_pos++;
-      
-      if(your_sample_pos >= your_sample_length)
-      {
-        your_sample_is_active = false;
-        break;
-      }
-    }
-  }
+  //if(your_sample_is_active)
+  //{
+  //  for(ma_uint32 i = 0; i < frameCount; ++i)
+  //  {
+  //    out[i * 2 + 0] += your_sample_data[your_sample_pos]; // Left
+  //    out[i * 2 + 1] += your_sample_data[your_sample_pos]; // Right
+  //    your_sample_pos++;
+  //    
+  //    if(your_sample_pos >= your_sample_length)
+  //    {
+  //      your_sample_is_active = false;
+  //      break;
+  //    }
+  //  }
+  //}
 }
 
 bool ksynth_init_audio_dev()
@@ -57,4 +57,3 @@ bool ksynth_init_audio_dev()
     return false;
   }
 }
-*/

@@ -1,0 +1,21 @@
+{
+    "configurations": [
+      {
+          "name": "Windows",
+          "includePath": [
+              "${workspaceFolder}/**",
+              "C:\\TDM-GCC-64\\include"
+          ],
+          "defines":
+          [
+            "LOGC__USER_SETTINGS",
+            "KSYNTH_MSVC_TESTING"
+          ],
+          "compilerPath": "C:\\TDM-GCC-64\\bin/g++",
+          "cStandard": "c17",
+          "cppStandard": "c++20",
+          "intelliSenseMode": "linux-gcc-x64"
+      }
+    ],
+    "version": 4
+}
