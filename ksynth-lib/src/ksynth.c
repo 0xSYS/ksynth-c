@@ -434,7 +434,7 @@ bool ksynth_get_release_oldest_instance_on_note_off(struct KSynth* ksynth_instan
   {
 		//fprintf(stderr, "[KSynth] Error: Invalid KSynth instance.\n");
     log_error("Invalid KSynth instance !!!");
-		return NULL;
+		return false;
 	}
 
 	return ksynth_instance->release_oldest_instance_on_note_off;

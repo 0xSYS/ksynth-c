@@ -56,4 +56,5 @@ bool ksynth_init_audio_dev()
     ma_device_uninit(&device);
     return false;
   }
+  return true;
 }

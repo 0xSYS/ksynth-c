@@ -28,13 +28,13 @@ typedef struct
 #pragma pack(push, 1)
 typedef struct
 {
-  char presetName[20];
-  uint16_t preset;
-  uint16_t bank;
-  uint16_t presetBagIndex;
-  uint32_t library;
-  uint32_t genre;
-  uint32_t morphology;
+  char presetName[20];     // 20 bytes
+  uint16_t preset;         // 2 bytes
+  uint16_t bank;           // 2 bytes
+  uint16_t presetBagIndex; // 2 bytes
+  uint32_t library;        // 4 bytes
+  uint32_t genre;          // 4 bytes
+  uint32_t morphology;     // 4 bytes
 }PresetHeader;
 #pragma pack(pop)
 

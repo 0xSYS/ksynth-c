@@ -18,20 +18,28 @@ Todo: Get sample loop
 // Read PHDR just for info (optional)
 void read_phdr(FILE* f, uint32_t size)
 {
-  size_t count = size / sizeof(Instrument);
-  Instrument* instruments = malloc(size);
-  fread(instruments, 1, size, f);
-
-  printf("Instruments:\n");
-  for(size_t i = 0; i < count - 1; i++) // last is terminator
+  if(size % sizeof(PresetHeader) != 0)
   {
-    char name[21];
-    memcpy(name, instruments[i].instName, 20);
-    name[20] = '\0';
-    printf("Instrument %zu: %s | InstBagNdx: %u\n", i, name, instruments[i].instBagNdx);
+    log_error("ERROR: phdr chunk size (%u) is not a multiple of PresetHeader size (%zu)\n", size, sizeof(PresetHeader));
+    return;
   }
 
-  free(instruments);
+  size_t count = size / sizeof(PresetHeader);
+  PresetHeader* presets = malloc(size);
+
+  fread(presets, sizeof(PresetHeader), count, f);
+
+  printf("Presets:\n");
+  for(size_t i = 0; i < count - 1; i++)\
+  {
+    // last is terminator
+    char name[21];
+    memcpy(name, presets[i].presetName, 20);
+    name[20] = '\0';
+    printf("\033[38;5;30mPreset\033[0m \033[38;5;41m%zu\033[0m: | \033[38;5;51mPreset#\033[0m: \033[38;5;41m%u\033[0m | \033[38;5;118mBank\033[0m: \033[38;5;41m%u\033[0m | \033[38;5;63mBag Index\033[0m: \033[38;5;41m%u\033[0m | \033[38;5;27mPreset Name\033[0m: \033[38;5;112m%s\033[0m\n", i, presets[i].preset, presets[i].bank, presets[i].presetBagIndex, name);
+  }
+
+  free(presets);
 }
 
 // Read SHDR to get SampleHeader info
@@ -47,7 +55,7 @@ SampleHeader* read_shdr(FILE* f, uint32_t size, size_t* out_count)
     char name[21];
     memcpy(name, samples[i].sampleName, 20);
     name[20] = '\0';
-    printf("Sample %zu: %s | Start: %u, End: %u, Rate: %u\n", i, name, samples[i].start, samples[i].end, samples[i].sampleRate);
+    printf("\033[38;5;33mSample\033[0m \033[38;5;41m%2zu\033[0m: | \033[38;5;208mStart\033[0m: \033[38;5;41m%u\033[0m | \033[38;5;208mEnd\033[0m: \033[38;5;41m%u\033[0m | \033[38;5;200mLS\033[0m: \033[38;5;41m%u\033[0m | \033[38;5;200mLE\033[0m: \033[38;5;41m%u\033[0m | \033[30;5;197mSample Rate\033[0m: \033[38;5;41m%u\033[0m | \033[38;5;226mSample Name\033[0m: \033[38;5;112m%s\033[0m\n", i, samples[i].start, samples[i].end, samples[i].startLoop, samples[i].endLoop, samples[i].sampleRate, name);
   }
 
   *out_count = count - 1; // exclude EOS terminator
@@ -189,8 +197,7 @@ void ksynth_load_sf2_samples(const char* path, struct Sample** out_samples, size
     if(memcmp(subchunk.id, "phdr", 4) == 0)
     {
       // We can skip, or optionally parse instruments if needed
-      // read_phdr(f, subchunk.size);
-      fseek(f, subchunk.size, SEEK_CUR);
+      read_phdr(f, subchunk.size);
     }
     else if(memcmp(subchunk.id, "shdr", 4) == 0)
     {
@@ -316,9 +323,12 @@ void ksynth_load_sf2_samples(const char* path, struct Sample** out_samples, size
     // audio_data points inside sample_data buffer, offset by sample start
     samples[i].audio_data = sample_data + sample_headers[i].start;
   
-      // Default keyrange to full (0-127), will update later if found
+    // Default keyrange to full (0-127), will update later if found
     samples[i].low_key = 0;
     samples[i].hi_key = 127;
+
+    samples[i].loop_start = sample_headers[i].startLoop - sample_headers[i].start;
+    samples[i].loop_end   = sample_headers[i].endLoop   - sample_headers[i].start;
   }
 
     // Parse instruments to find key range for each sample
@@ -327,8 +337,8 @@ void ksynth_load_sf2_samples(const char* path, struct Sample** out_samples, size
   {
     for(size_t inst_i = 0; inst_i < instrument_count - 1; inst_i++) // last is terminator
     {
-        uint16_t bag_start = instruments[inst_i].instBagNdx;
-        uint16_t bag_end = instruments[inst_i + 1].instBagNdx;
+      uint16_t bag_start = instruments[inst_i].instBagNdx;
+      uint16_t bag_end = instruments[inst_i + 1].instBagNdx;
         
       for(uint16_t bag_i = bag_start; bag_i < bag_end; bag_i++)
       {

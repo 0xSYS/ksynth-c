@@ -13,6 +13,8 @@ struct Sample
 	unsigned int length;
   uint8_t low_key;
   uint8_t hi_key;
+  unsigned int loop_start;
+  unsigned int loop_end;
 };
 
 void sample_free(struct Sample* sample);
