@@ -6,6 +6,49 @@
 
 
 
+
+
+
+
+#if defined(_WIN32) || defined(_WIN64)
+void SetTerminal()
+{
+    static HANDLE stdoutHandle, stdinHandle;
+    static DWORD outModeInit, inModeInit;
+
+    DWORD outMode = 0, inMode = 0;
+    stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    stdinHandle = GetStdHandle(STD_INPUT_HANDLE);
+
+    if(stdoutHandle == INVALID_HANDLE_VALUE || stdinHandle == INVALID_HANDLE_VALUE) 
+    {
+        exit(GetLastError());
+    }
+
+    if(!GetConsoleMode(stdoutHandle, &outMode) || !GetConsoleMode(stdinHandle, &inMode)) 
+    {
+        exit(GetLastError());
+    }
+
+    outModeInit = outMode;
+    inModeInit = inMode;
+
+    // Enable ANSI escape codes
+    outMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+
+    // Set stdin as no echo and unbuffered
+    inMode = (ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT);
+
+    if(!SetConsoleMode(stdoutHandle, outMode) || !SetConsoleMode(stdinHandle, inMode)) 
+    {
+        exit(GetLastError());
+    }
+    SetConsoleOutputCP(CP_UTF8); //Enabling unicode charset on windows console
+}
+#endif
+
+
+
 struct KSynth* synth;
 
 void Test1()
@@ -42,7 +85,7 @@ void Test2()
     size_t sample_count = 0;
 
     // Load samples from a SoundFont
-    ksynth_load_sf2_samples("C:\\Users\\acer\\Desktop\\BM\\Soundfonts\\Keppys Steinway Piano 7.2.sf2", &sf2_samples, &sample_count);
+    ksynth_load_sf2_samples("C:\\Users\\acer\\Desktop\\BM\\Soundfonts\\Arachno SoundFont Version 1.0.sf2", &sf2_samples, &sample_count);
 
     if(sf2_samples == NULL || sample_count == 0)
     {
@@ -61,7 +104,7 @@ void Test2()
     // Free the audio data for each sample
     for(size_t i = 0; i < sample_count; i++)
     {
-        printf("Freeing stuff...\n");
+        //printf("Freeing stuff...\n");
         free(sf2_samples[i].audio_data);
     }
 
@@ -88,6 +131,9 @@ void Test3()
 
 
 int main(int argc, char** argv) {
+#if defined(_WIN32) || defined(_WIN64)
+    SetTerminal();
+#endif
     printf("hello world!\n");
     //Test1();
     Test2();
