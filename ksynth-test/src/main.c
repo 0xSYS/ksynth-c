@@ -55,16 +55,16 @@ void Test1()
 {
     char key;
     int i = 0;
-    synth = ksynth_new("PLM060.wav", 48000, 2, MAX_POLYPHONY, true);
+    synth = ksynth_new("C:\\Users\\acer\\Desktop\\BM\\Soundfonts\\Keppys Steinway Piano 7.2.sf2", 48000, 2, MAX_POLYPHONY, true);
     while(1)
     {
         //printf("Sending notes... (%d Times)\n", i++);
         //key = _getch();
         //if(key == 'q')
         //    break;
-        ksynth_note_on(synth, 1, 60, 127);
+        ksynth_note_on(synth, 1, 2, 127);
         Sleep(1);
-        ksynth_note_off(synth, 1, 60);
+        ksynth_note_off(synth, 1, 2);
         Sleep(1);
     }
     ksynth_free(synth);
@@ -198,15 +198,21 @@ void Test4()
 
 }
 
+void Test5()
+{
+
+}
+
 
 int main(int argc, char** argv) {
 #if defined(_WIN32) || defined(_WIN64)
     SetTerminal();
 #endif
     printf("hello world!\n");
-    //Test1();
+    Test1();
     //Test2();
     //Test3();
-    Test4();
+    //Test4();
+    //Test5();
     return 0;
 }

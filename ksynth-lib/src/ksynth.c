@@ -4,7 +4,23 @@
 
 
 #include "ksynth.h"
+#include "soundfont/sf2.h"
+#include "output/audio_device.h"
 #include "utils.h"
+
+
+
+
+
+
+
+struct Sample* samples = NULL;
+unsigned int sample_count = 0;
+PresetEffects* presets = NULL;
+unsigned int preset_count = 0;
+int16_t** preset_gens = NULL;
+
+
 
 
 
@@ -19,6 +35,33 @@ float compute_velocity_sse2(float logVel, float pow, float coeff)
 	return result;
 }
 #endif
+
+
+
+
+
+void ksynth_load_sf2_from_file(const char * path)
+{
+  int r = ksynth_sf2_load(path, &samples, &sample_count, &presets, &preset_count, &preset_gens);
+
+  if(r != 0)
+  {
+    log_error("Failed to load soundfont: %s", path);
+    return;
+  }
+
+  for(int i = 0; i < sample_count; i++)
+  {
+    printf("Loading Sample: %d\n", i);
+    load_soundfont_sample(&samples[i], samples[i].audio_data, samples[i].sample_rate, samples[i].length, samples[i].low_key, samples[i].hi_key, samples[i].loop_start, samples[i].loop_end);
+  }
+
+  log_info("Loaded %u samples, %u presets\n", sample_count, preset_count);
+}
+
+
+
+
 
 void int_free_voices(struct Voice** voices, unsigned long count)
 {
@@ -192,10 +235,32 @@ struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate
 		ksynth_instance->max_polyphony = max_polyphony;
 		ksynth_instance->release_oldest_instance_on_note_off = release_oldest_instance_on_note_off;
 
+    int r = ksynth_sf2_load(sample_file_path, &samples, &sample_count, &presets, &preset_count, &preset_gens);
+
+    if(r != 0)
+    {
+      log_error("Failed to parse soundfont: %s", sample_file_path);
+      return NULL;
+    }
+
+    if(!init_audio_eng(ksynth_instance->voices))
+    {
+      log_error("Failed to initialize audio engine !!!");
+      return NULL;
+    }
+
 		ksynth_instance->voices = int_allocate_voices(ksynth_instance);
 		if(ksynth_instance->voices)
     {
-			ksynth_instance->samples = int_allocate_samples(sample_file_path, MAX_KEYS, ksynth_instance);
+			//ksynth_instance->samples = int_allocate_samples(sample_file_path, MAX_KEYS, ksynth_instance);
+
+      for(int i = 0; i < sample_count; i++)
+      {
+        printf("Loading Sample: %d\n", i);
+        load_soundfont_sample(&samples[i], samples[i].audio_data, samples[i].sample_rate, samples[i].length, samples[i].low_key, samples[i].hi_key, samples[i].loop_start, samples[i].loop_end);
+      }
+
+      log_info("Loaded %u samples, %u presets\n", sample_count, preset_count);
 
 			if(ksynth_instance->samples)
       {
@@ -223,11 +288,36 @@ struct KSynth* ksynth_new(const char* sample_file_path, unsigned int sample_rate
 
 void ksynth_note_on(struct KSynth* ksynth_instance, unsigned char channel, unsigned char note, unsigned char velocity)
 {
-	if(!ksynth_instance || !ksynth_instance->voices || channel > 15 || note > (MAX_KEYS - 1) || velocity > 127)
+	//if(!ksynth_instance || !ksynth_instance->voices || channel > 15 || note > (MAX_KEYS - 1) || velocity > 127)
+  //{
+  //  log_error("Invalid parameters for note on event !!!");
+	//	return;
+	//}
+
+  if(!ksynth_instance)
   {
-    log_error("Invalid parameters for note on event !!!");
-		return;
-	}
+    log_error("No KSynth instance !!!");
+    return;
+  }
+  else if(!ksynth_instance->voices)
+  {
+    log_error("No voices !!!");
+    return;
+  }
+  else if(channel > 15)
+  {
+    log_error("Too many channels");
+  }
+  else if(note > (MAX_KEYS - 1))
+  {
+    log_error("Note index is larger than 128 !!!");
+    return;
+  }
+  else if(velocity > 127)
+  {
+    log_error("Velocity is larger than 127 !!!");
+    return;
+  }
 
 	if(velocity < 1)
     ksynth_note_off(ksynth_instance, channel, note);
@@ -260,7 +350,8 @@ void ksynth_note_on(struct KSynth* ksynth_instance, unsigned char channel, unsig
 			ksynth_instance->voices[i] = ksynth_instance->voices[i + 1];
 		}
 
-		ksynth_instance->voices[ksynth_instance->max_polyphony - 1] = voice;
+		//ksynth_instance->voices[ksynth_instance->max_polyphony - 1] = voice;
+    sample_play(ksynth_instance->voices[ksynth_instance->max_polyphony - 1] = voice, samples, channel, note, velocity);
 	}
   else
   {
@@ -319,6 +410,7 @@ void ksynth_note_off(struct KSynth* ksynth_instance, unsigned char channel, unsi
 				voice->tokill = 1;
 			}
 		}
+    sample_stop(voice);
 	}
 }
 

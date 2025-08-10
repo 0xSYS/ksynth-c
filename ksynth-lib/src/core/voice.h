@@ -15,6 +15,7 @@ struct Voice
 	unsigned char velocity;
 	unsigned int curfalloff;
 	unsigned int sample_position;
+  struct Sample* sample;
 };
 
 void voice_free(struct Voice* voice);
